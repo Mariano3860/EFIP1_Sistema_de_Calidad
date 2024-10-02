@@ -52,18 +52,6 @@ CREATE TABLE EspecificacionAtributo (
                                         FOREIGN KEY (idEspecificacion) REFERENCES Especificacion(idEspecificacion)
 );
 
--- Tabla CalificacionLote
-CREATE TABLE CalificacionLote (
-                                  idIngreso INT,
-                                  numMuestra INT,
-                                  idEspecificacion INT,
-                                  estado VARCHAR(50),
-                                  fecha DATE,
-                                  PRIMARY KEY (idIngreso, numMuestra, idEspecificacion),
-                                  FOREIGN KEY (idIngreso) REFERENCES Ingreso(idIngreso),
-                                  FOREIGN KEY (idIngreso, numMuestra, idEspecificacion) REFERENCES CalifLoteAtributo(idIngreso, numMuestra, idEspecificacion)
-);
-
 -- Tabla CalifLoteAtributo
 CREATE TABLE CalifLoteAtributo (
                                    idIngreso INT,
@@ -73,18 +61,21 @@ CREATE TABLE CalifLoteAtributo (
                                    valor DECIMAL(10, 2),
                                    comentario VARCHAR(255),
                                    PRIMARY KEY (idIngreso, numMuestra, idAtributo, idEspecificacion),
-                                   FOREIGN KEY (idAtributo, idEspecificacion) REFERENCES EspecificacionAtributo(idAtributo, idEspecificacion)
+                                   FOREIGN KEY (idAtributo, idEspecificacion) REFERENCES EspecificacionAtributo(idAtributo, idEspecificacion),
+                                   INDEX idx_califloteatributo (idIngreso, numMuestra, idEspecificacion)  -- Index for foreign key in CalificacionLote
 );
 
--- Tabla CalificacionFinal
-CREATE TABLE CalificacionFinal (
-                                   idIngreso INT,
-                                   idEspecificacion INT,
-                                   fecha DATE,
-                                   estado VARCHAR(50),
-                                   PRIMARY KEY (idIngreso, idEspecificacion),
-                                   FOREIGN KEY (idIngreso) REFERENCES Ingreso(idIngreso),
-                                   FOREIGN KEY (idIngreso, idEspecificacion) REFERENCES CalifFinalAtributo(idIngreso, idEspecificacion)
+-- Tabla CalificacionLote
+CREATE TABLE CalificacionLote (
+                                  idIngreso INT,
+                                  numMuestra INT,
+                                  idEspecificacion INT,
+                                  estado VARCHAR(50),
+                                  fecha DATE,
+                                  PRIMARY KEY (idIngreso, numMuestra, idEspecificacion),
+                                  FOREIGN KEY (idIngreso) REFERENCES Ingreso(idIngreso),
+                                  FOREIGN KEY (idIngreso, numMuestra, idEspecificacion)
+                                      REFERENCES CalifLoteAtributo(idIngreso, numMuestra, idEspecificacion)
 );
 
 -- Tabla CalifFinalAtributo
@@ -95,5 +86,18 @@ CREATE TABLE CalifFinalAtributo (
                                     valor DECIMAL(10, 2),
                                     comentario VARCHAR(255),
                                     PRIMARY KEY (idIngreso, idEspecificacion, idAtributo),
-                                    FOREIGN KEY (idEspecificacion, idAtributo) REFERENCES EspecificacionAtributo(idEspecificacion, idAtributo)
+                                    FOREIGN KEY (idEspecificacion, idAtributo)
+                                        REFERENCES EspecificacionAtributo(idEspecificacion, idAtributo)
+);
+
+-- Tabla CalificacionFinal
+CREATE TABLE CalificacionFinal (
+                                   idIngreso INT,
+                                   idEspecificacion INT,
+                                   fecha DATE,
+                                   estado VARCHAR(50),
+                                   PRIMARY KEY (idIngreso, idEspecificacion),
+                                   FOREIGN KEY (idIngreso) REFERENCES Ingreso(idIngreso),
+                                   FOREIGN KEY (idIngreso, idEspecificacion)
+                                       REFERENCES CalifFinalAtributo(idIngreso, idEspecificacion)
 );
