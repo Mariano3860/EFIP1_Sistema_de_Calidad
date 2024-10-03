@@ -9,8 +9,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class LoteController {
+    // Logger declarado como final y estático
+    private static final Logger logger = Logger.getLogger(LoteController.class.getName());
 
     // Mét.odo para registrar un nuevo ingreso en la base de datos
     public boolean registrarIngreso(String proveedor, String tipo, int idArticulo, int idUsuario) {
@@ -21,15 +25,15 @@ public class LoteController {
 
             statement.setString(1, proveedor);
             statement.setString(2, tipo);
-            statement.setInt(3, idArticulo);  // id del artículo relacionado
-            statement.setInt(4, idUsuario);   // id del usuario que registra el ingreso
+            statement.setInt(3, idArticulo);
+            statement.setInt(4, idUsuario);
 
             int rowsInserted = statement.executeUpdate();
-            return rowsInserted > 0;  // Devuelve true si se insertó correctamente
+            return rowsInserted > 0;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;  // Devuelve false si hubo un error
+            logger.log(Level.SEVERE, "Error al registrar el ingreso", e);
+            return false;
         }
     }
 
@@ -58,7 +62,7 @@ public class LoteController {
                 ingresos.add(ingreso);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error al obtener ingresos con información adicional", e);
         }
 
         return ingresos;

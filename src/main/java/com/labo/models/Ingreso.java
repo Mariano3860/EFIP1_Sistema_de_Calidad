@@ -2,13 +2,14 @@ package com.labo.models;
 
 import java.util.Date;
 
+@SuppressWarnings("unused")
 public class Ingreso {
-    private int idIngreso;
-    private String proveedor;
-    private String tipo;
-    private Date fecha;
-    private String nombreArticulo;
-    private String nombreUsuario;
+    private final int idIngreso;
+    private final String proveedor;
+    private final String tipo;
+    private final Date fecha;
+    private final String nombreArticulo;
+    private final String nombreUsuario;
 
     // Constructor, getters y setters
     public Ingreso(int idIngreso, String proveedor, String tipo, Date fecha, String nombreArticulo, String nombreUsuario) {

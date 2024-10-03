@@ -7,8 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class LoginFrame extends JFrame {
-    private JTextField userField;
-    private JPasswordField passField;
+    private final JTextField userField;
+    private final JPasswordField passField;
 
     public LoginFrame() {
         setTitle("Login");
@@ -44,7 +44,7 @@ public class LoginFrame extends JFrame {
             if (controller.autenticar(username, password)) {
                 JOptionPane.showMessageDialog(null, "Login exitoso");
                 dispose();
-                new LoteFrame().setVisible(true);  // Abre la ventana de Lotes
+                new LoteFrame().setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos");
             }
