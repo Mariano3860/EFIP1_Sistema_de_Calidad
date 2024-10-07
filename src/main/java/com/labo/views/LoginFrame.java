@@ -13,7 +13,7 @@ public class LoginFrame extends JFrame {
 
     public LoginFrame() {
         setTitle("Login");
-        setSize(300, 150);
+        setSize(320, 150);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Crear panel principal con un borde para dar separación del borde de la ventana
@@ -74,7 +74,4 @@ public class LoginFrame extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
-    }
 }

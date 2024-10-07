@@ -1,6 +1,7 @@
 package com.labo.controllers;
 
 import com.labo.dao.DatabaseConnection;
+import com.labo.models.Articulo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -61,5 +62,24 @@ public class ArticuloController {
             logger.log(Level.SEVERE, "Error al obtener el ID del artículo", e);
         }
         return -1; // Retorna -1 si no se encuentra el artículo
+    }
+
+    public List<Articulo> obtenerArticulos() {
+        List<Articulo> articulos = new ArrayList<>();
+        String query = "SELECT idArticulo, nombre FROM Articulo";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                Articulo articulo = new Articulo(resultSet.getInt("idArticulo"), resultSet.getString("nombre"));
+                articulos.add(articulo);
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error al obtener artículos", e);
+        }
+
+        return articulos;
     }
 }

@@ -7,19 +7,22 @@ public class Ingreso {
     private final String proveedor;
     private final String tipo;
     private final Date fecha;
-    private final String nombreArticulo;
-    private final String nombreUsuario;
+    private final int idArticulo;
+    private final int idUsuario;
+    private String nombreArticulo;  // Almacenar el nombre del artículo
+    private String nombreUsuario;   // Almacenar el nombre del usuario
 
-    // Constructor, getters y setters
-    public Ingreso(int idIngreso, String proveedor, String tipo, Date fecha, String nombreArticulo, String nombreUsuario) {
+    // Constructor con IDs
+    public Ingreso(int idIngreso, String proveedor, String tipo, Date fecha, int idArticulo, int idUsuario) {
         this.idIngreso = idIngreso;
         this.proveedor = proveedor;
         this.tipo = tipo;
         this.fecha = fecha;
-        this.nombreArticulo = nombreArticulo;
-        this.nombreUsuario = nombreUsuario;
+        this.idArticulo = idArticulo;
+        this.idUsuario = idUsuario;
     }
 
+    // Getters para los IDs y otros atributos
     public int getIdIngreso() {
         return idIngreso;
     }
@@ -36,17 +39,35 @@ public class Ingreso {
         return fecha;
     }
 
+    public int getIdArticulo() {
+        return idArticulo;
+    }
+
+    public int getIdUsuario() {
+        return idUsuario;
+    }
+
+    // Getters y Setters para los nombres
     public String getNombreArticulo() {
         return nombreArticulo;
+    }
+
+    public void setNombreArticulo(String nombreArticulo) {
+        this.nombreArticulo = nombreArticulo;
     }
 
     public String getNombreUsuario() {
         return nombreUsuario;
     }
 
+    public void setNombreUsuario(String nombreUsuario) {
+        this.nombreUsuario = nombreUsuario;
+    }
+
     @Override
     public String toString() {
         return "ID: " + idIngreso + ", Proveedor: " + proveedor + ", Tipo: " + tipo +
-                ", Fecha: " + fecha + ", Artículo: " + nombreArticulo + ", Usuario: " + nombreUsuario;
+                ", Fecha: " + fecha + ", Artículo: " + nombreArticulo + " (ID: " + idArticulo + ")" +
+                ", Usuario: " + nombreUsuario + " (ID: " + idUsuario + ")";
     }
 }

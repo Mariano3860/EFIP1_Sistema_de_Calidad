@@ -65,13 +65,43 @@ public class EspecificacionPanel extends JPanel {
             }
         };
 
-        atributoTable.setPreferredScrollableViewportSize(new Dimension(400, 100)); // Tamaño ajustado de la tabla
+        atributoTable.setPreferredScrollableViewportSize(new Dimension(400, 200)); // Tamaño ajustado de la tabla
         JScrollPane atributoScrollPane = new JScrollPane(atributoTable);
-        add(atributoScrollPane, BorderLayout.CENTER);
+
+        // Crear un panel para la tabla de atributos y los botones
+        JPanel attributePanel = new JPanel();
+        attributePanel.setLayout(new BoxLayout(attributePanel, BoxLayout.Y_AXIS));
+        attributePanel.add(atributoScrollPane);
+
+        // Panel de botones para agregar y eliminar atributos
+        JPanel attributeButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JButton addAtributoButton = new JButton("Añadir Atributo");
+        JButton deleteAtributoButton = new JButton("Eliminar Atributo");
+        saveButton = new JButton("Guardar Especificación");
+        saveButton.setEnabled(false); // Deshabilitar el botón al principio
+        saveButton.addActionListener(new SaveAtributosListener());
+
+        attributeButtonPanel.add(addAtributoButton);
+        attributeButtonPanel.add(deleteAtributoButton);
+        attributeButtonPanel.add(saveButton);
+
+        // Remover cualquier borde de la parte superior
+        attributePanel.setBorder(null);
+
+        // Añadir el panel de botones debajo de la tabla de atributos
+        attributePanel.add(attributeButtonPanel);
+
+        // Añadir una línea debajo de los botones de atributos
+        attributeButtonPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.GRAY));
+
+        // Añadir el panel de atributos completo al centro del layout principal
+        add(attributePanel, BorderLayout.CENTER);
+
+        // Añadir un gap entre los botones de atributos y el formulario para crear una nueva especificación
+        attributePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));  // Agregar un gap de 10px debajo de los botones de atributos
 
         // Panel de entrada de datos para crear/modificar especificación
-        JPanel inputPanel = new JPanel(new GridLayout(2, 2));
-
+        JPanel inputPanel = new JPanel(new GridLayout(2, 2,5,5));
         especificacionNombreInput = new JTextField();
         List<String> articulos = articuloController.obtenerNombresArticulos();
         articuloComboBox = new JComboBox<>(articulos.toArray(new String[0]));
@@ -84,31 +114,27 @@ public class EspecificacionPanel extends JPanel {
         inputPanel.add(new JLabel("Artículo:"));
         inputPanel.add(articuloComboBox);
 
-        add(inputPanel, BorderLayout.SOUTH);
-
-        // Botones para las acciones
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // Separación de 10px entre botones
+        // Panel de botones principales
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         JButton addEspecificacionButton = new JButton("Crear Nueva Especificación");
-        JButton addAtributoButton = new JButton("Añadir Atributo");
-        JButton deleteAtributoButton = new JButton("Eliminar Atributo");
-        JButton deleteEspecificacionButton = new JButton("Eliminar Especificación"); // Nuevo botón de eliminar especificación
-        saveButton = new JButton("Guardar Atributos");
-        saveButton.setEnabled(false); // Deshabilitar el botón al principio
+        JButton deleteEspecificacionButton = new JButton("Eliminar Especificación");
 
         addEspecificacionButton.addActionListener(new AddEspecificacionListener());
         addAtributoButton.addActionListener(new AddAtributoListener());
         deleteAtributoButton.addActionListener(new DeleteAtributoListener());
-        deleteEspecificacionButton.addActionListener(new DeleteEspecificacionListener()); // Listener del nuevo botón
-        saveButton.addActionListener(new SaveAtributosListener());
+        deleteEspecificacionButton.addActionListener(new DeleteEspecificacionListener());
 
         buttonPanel.add(addEspecificacionButton);
-        buttonPanel.add(addAtributoButton);
-        buttonPanel.add(deleteAtributoButton);
-        buttonPanel.add(deleteEspecificacionButton); // Agregar botón al panel
-        buttonPanel.add(saveButton);
+        buttonPanel.add(deleteEspecificacionButton);
 
-        add(buttonPanel, BorderLayout.SOUTH);
+        // Crear un panel combinado para los botones y el formulario de entrada
+        JPanel combinedPanel = new JPanel(new BorderLayout());
+        combinedPanel.add(inputPanel, BorderLayout.NORTH);
+        combinedPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Añadir el panel combinado al sur del BorderLayout principal
+        add(combinedPanel, BorderLayout.SOUTH);
 
         // Cargar las especificaciones existentes en la tabla
         cargarEspecificaciones();
@@ -122,8 +148,14 @@ public class EspecificacionPanel extends JPanel {
 
         // Listener para habilitar el botón de guardar si se modifica la tabla de atributos
         atributoTableModel.addTableModelListener(e -> {
-            if (atributoTableModel.getRowCount() > 0) {
-                saveButton.setEnabled(true); // Habilitar el botón si hay filas en la tabla de atributos
+            saveButton.setEnabled(true); // Habilitar el botón si se modifica la tabla de atributos
+        });
+
+        // Listener para habilitar el botón de guardar si se modifica el nombre de la especificación
+        especificacionNombreInput.getDocument().addDocumentListener(new SimpleDocumentListener() {
+            @Override
+            public void update() {
+                saveButton.setEnabled(true);
             }
         });
     }
@@ -296,6 +328,23 @@ public class EspecificacionPanel extends JPanel {
                     JOptionPane.showMessageDialog(null, "Error al guardar los atributos");
                 }
             }
+        }
+    }
+
+    // Implementación de SimpleDocumentListener para detectar cambios en el JTextField
+    private abstract static class SimpleDocumentListener implements javax.swing.event.DocumentListener {
+        public abstract void update();
+        @Override
+        public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            update();
+        }
+        @Override
+        public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            update();
+        }
+        @Override
+        public void changedUpdate(javax.swing.event.DocumentEvent e) {
+            update();
         }
     }
 }

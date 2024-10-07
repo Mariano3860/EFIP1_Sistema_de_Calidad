@@ -15,7 +15,36 @@ import java.util.logging.Logger;
 public class UsuarioController {
     private static final Logger logger = Logger.getLogger(UsuarioController.class.getName());
 
-    // Mét.odo para obtener la lista de usuarios desde la base de datos
+    // Campo para almacenar el usuario autenticado
+    private static Usuario usuarioAutenticado;
+
+    // Método para autenticar y almacenar el usuario autenticado
+    public boolean autenticar(String nombre, String contrasena) {
+        String query = "SELECT idUsuario, nombre FROM Usuario WHERE nombre = ? AND contraseña = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, nombre);
+            statement.setString(2, contrasena);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                // Si la autenticación es exitosa, se almacena el usuario autenticado
+                usuarioAutenticado = new Usuario(resultSet.getInt("idUsuario"), resultSet.getString("nombre"));
+                return true;
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error al loguear", e);
+        }
+        return false;
+    }
+
+    // Método para obtener el usuario actualmente autenticado
+    public Usuario obtenerUsuarioAutenticado() {
+        return usuarioAutenticado;
+    }
+
+    // Método para obtener la lista de usuarios desde la base de datos
     public List<Usuario> obtenerUsuarios() {
         List<Usuario> usuarios = new ArrayList<>();
         String query = "SELECT idUsuario, nombre FROM Usuario";
@@ -24,7 +53,6 @@ public class UsuarioController {
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
-            // Procesar el resultado y crear objetos Usuario
             while (resultSet.next()) {
                 Usuario usuario = new Usuario(
                         resultSet.getInt("idUsuario"),
@@ -37,21 +65,5 @@ public class UsuarioController {
         }
 
         return usuarios;
-    }
-
-    public boolean autenticar(String nombre, String contrasena) {
-        String query = "SELECT * FROM Usuario WHERE nombre = ? AND contraseña = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-
-            statement.setString(1, nombre);
-            statement.setString(2, contrasena);
-            ResultSet resultSet = statement.executeQuery();
-
-            return resultSet.next(); // Si existe una fila, el login es exitoso
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error al loguear", e);
-            return false;
-        }
     }
 }
