@@ -15,18 +15,34 @@ public class LoginFrame extends JFrame {
         setTitle("Login");
         setSize(300, 150);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
 
-        JPanel panel = new JPanel(new GridLayout(3, 2));
-        add(panel, BorderLayout.CENTER);
+        // Crear panel principal con un borde para dar separación del borde de la ventana
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Margen de 10 px en todos los lados
+        add(mainPanel);
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 5, 5)); // Panel de campos de usuario y contraseña con un espaciado de 5px
+        mainPanel.add(panel, BorderLayout.CENTER);
 
         JLabel userLabel = new JLabel("Usuario:");
         userField = new JTextField();
         JLabel passLabel = new JLabel("Contraseña:");
         passField = new JPasswordField();
 
+        // Agregar los campos al panel
+        panel.add(userLabel);
+        panel.add(userField);
+        panel.add(passLabel);
+        panel.add(passField);
+
+        // Crear un nuevo panel para el botón de login, alineado a la derecha
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton loginButton = new JButton("Login");
         loginButton.addActionListener(new LoginButtonListener());
+        buttonPanel.add(loginButton);
+
+        // Agregar el panel del botón en la parte inferior del panel principal
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         // Asignar acción para la tecla Enter
         InputMap inputMap = panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -39,12 +55,6 @@ public class LoginFrame extends JFrame {
                 loginButton.doClick(); // Simula un clic en el botón de login
             }
         });
-
-        panel.add(userLabel);
-        panel.add(userField);
-        panel.add(passLabel);
-        panel.add(passField);
-        panel.add(loginButton);
     }
 
     private class LoginButtonListener implements ActionListener {
