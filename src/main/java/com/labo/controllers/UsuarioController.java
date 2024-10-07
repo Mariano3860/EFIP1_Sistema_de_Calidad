@@ -1,6 +1,6 @@
 package com.labo.controllers;
 
-import com.labo.DatabaseConnection;
+import com.labo.database.DatabaseConnection;
 import com.labo.models.Usuario;
 
 import java.sql.Connection;

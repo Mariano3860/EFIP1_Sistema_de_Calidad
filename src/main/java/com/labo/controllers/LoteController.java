@@ -1,11 +1,11 @@
 package com.labo.controllers;
 
-import com.labo.DatabaseConnection;
+import com.labo.database.DatabaseConnection;
 import com.labo.models.Articulo;
 import com.labo.models.Ingreso;
 
 import java.sql.Connection;
-import java.sql.Date;  // Usar java.sql.Date para manejar fechas en SQL
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -86,4 +86,5 @@ public class LoteController {
 
         return ingresos;
     }
+
 }

@@ -1,4 +1,4 @@
-package com.labo;
+package com.labo.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,4 +1,4 @@
-package com.labo;
+package com.labo.frames;
 
 import com.labo.controllers.UsuarioController;
 import javax.swing.*;
@@ -44,7 +44,7 @@ public class LoginFrame extends JFrame {
             if (controller.autenticar(username, password)) {
                 JOptionPane.showMessageDialog(null, "Login exitoso");
                 dispose();
-                new LoteFrame().setVisible(true);
+                new MainFrame().setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos");
             }

@@ -1,21 +1,27 @@
-package com.labo;
+package com.labo.frames;
 
 import com.labo.controllers.LoteController;
 import com.labo.controllers.UsuarioController;
 import com.labo.models.Ingreso;
-import com.labo.models.Articulo;
 import com.labo.models.Usuario;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Date;
+import java.util.Map;
 
-public class LoteFrame extends JFrame {
+/**
+ * Esta clase representa el panel para gestionar los ingresos de lotes.
+ */
+public class LotePanel extends JPanel {
+    private final JTable loteTable;
     private final DefaultTableModel tableModel;
     private final JTextField loteInputProveedor;
     private final JTextField loteInputTipo;
@@ -23,87 +29,75 @@ public class LoteFrame extends JFrame {
     private final JComboBox<String> loteInputUsuario;
     private final JTextField loteInputFecha;
     private final LoteController controller;
+    private final UsuarioController usuarioController;
+    private final Map<String, Integer> usuarioMap; // Map para asociar nombre de usuario con su ID
 
-    public LoteFrame() {
+    public LotePanel() {
         controller = new LoteController();
-        UsuarioController usuarioController = new UsuarioController();
-        setTitle("Gestión de Lotes");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        usuarioController = new UsuarioController(); // Crear instancia del controlador de usuarios
+        usuarioMap = new HashMap<>(); // Inicializar el Map de usuarios
         setLayout(new BorderLayout());
 
         // Definir las columnas de la tabla
         String[] columnNames = {"ID Ingreso", "Proveedor", "Tipo", "Fecha", "Artículo", "Usuario"};
         tableModel = new DefaultTableModel(columnNames, 0);
-        JTable loteTable = new JTable(tableModel);
+        loteTable = new JTable(tableModel);
+
+        // Habilitar la ordenación por columnas
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        loteTable.setRowSorter(sorter);
+
+        // Ordenar por fecha (columna 3) de más reciente a más antigua por defecto
+        sorter.setSortKeys(List.of(new RowSorter.SortKey(3, SortOrder.DESCENDING)));
 
         // Scroll para la tabla
         JScrollPane scrollPane = new JScrollPane(loteTable);
         add(scrollPane, BorderLayout.CENTER);
 
         // Panel de entrada de datos
-        JPanel inputPanel = new JPanel(new GridLayout(7, 3));
+        JPanel inputPanel = new JPanel(new GridLayout(6, 2));
 
-        // Crear campos de entrada para cada dato
+        // Crear campos de entrada
         loteInputProveedor = new JTextField();
         loteInputTipo = new JTextField();
+        loteInputFecha = new JTextField(LocalDate.now().toString()); // Inicializa la fecha con la fecha actual
 
-        // Obtener los artículos y usuarios desde la base de datos
-        List<Articulo> articulos = controller.obtenerArticulos();
+        // Obtener los nombres de los artículos desde el controlador
+        List<String> articulos = controller.obtenerArticulos().stream().map(articulo -> articulo.getNombre()).toList();
+        loteInputArticulo = new JComboBox<>(articulos.toArray(new String[0]));
+
+        // Obtener los nombres de los usuarios y sus IDs desde el UsuarioController
         List<Usuario> usuarios = usuarioController.obtenerUsuarios();
+        for (Usuario usuario : usuarios) {
+            usuarioMap.put(usuario.getNombre(), usuario.getIdUsuario()); // Almacenar ID y nombre de usuario en el Map
+        }
+        loteInputUsuario = new JComboBox<>(usuarioMap.keySet().toArray(new String[0]));
 
-        loteInputArticulo = new JComboBox<>(articulos.stream().map(Articulo::getNombre).toArray(String[]::new));
-        loteInputUsuario = new JComboBox<>(usuarios.stream().map(Usuario::getNombre).toArray(String[]::new));
-
-        // Campo para ingresar la fecha y botón para poner la fecha actual
-        loteInputFecha = new JTextField();
-        JButton fechaHoyButton = new JButton("Hoy");
-        fechaHoyButton.addActionListener(e -> {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            loteInputFecha.setText(sdf.format(new Date()));  // Poner la fecha actual en formato yyyy-MM-dd
-        });
-
-        // Agregar los campos de entrada al panel
         inputPanel.add(new JLabel("Proveedor:"));
         inputPanel.add(loteInputProveedor);
-        inputPanel.add(new JLabel());  // Espacio vacío
-
         inputPanel.add(new JLabel("Tipo de Lote:"));
         inputPanel.add(loteInputTipo);
-        inputPanel.add(new JLabel());  // Espacio vacío
-
+        inputPanel.add(new JLabel("Fecha:"));
+        inputPanel.add(loteInputFecha); // Campo para ingresar la fecha
         inputPanel.add(new JLabel("Artículo:"));
         inputPanel.add(loteInputArticulo);
-        inputPanel.add(new JLabel());  // Espacio vacío
-
         inputPanel.add(new JLabel("Usuario:"));
         inputPanel.add(loteInputUsuario);
-        inputPanel.add(new JLabel());  // Espacio vacío
 
-        inputPanel.add(new JLabel("Fecha:"));
-        inputPanel.add(loteInputFecha);
-        inputPanel.add(fechaHoyButton);  // Botón para completar la fecha actual
-
-        // Botón para añadir el nuevo lote
         JButton addButton = new JButton("Añadir Lote");
         addButton.addActionListener(new AddLoteListener());
 
-        inputPanel.add(new JLabel());  // Espacio vacío
+        inputPanel.add(new JLabel());
         inputPanel.add(addButton);
 
         add(inputPanel, BorderLayout.SOUTH);
 
-        // Cargar los lotes existentes en la tabla
         cargarIngresos();
     }
 
     private void cargarIngresos() {
         List<Ingreso> ingresos = controller.obtenerIngresosConArticuloYUsuario();
         tableModel.setRowCount(0);  // Limpiar la tabla antes de cargar los nuevos datos
-
-        // Ordenar los ingresos por fecha, de más reciente a más antiguo
-        ingresos.sort((a, b) -> b.getFecha().compareTo(a.getFecha()));
-
         for (Ingreso ingreso : ingresos) {
             Object[] rowData = {
                     ingreso.getIdIngreso(),
@@ -122,14 +116,13 @@ public class LoteFrame extends JFrame {
         public void actionPerformed(ActionEvent e) {
             String proveedor = loteInputProveedor.getText();
             String tipo = loteInputTipo.getText();
-            int idArticulo = loteInputArticulo.getSelectedIndex() + 1;
-            int idUsuario = loteInputUsuario.getSelectedIndex() + 1;
-            String fechaTexto = loteInputFecha.getText();  // Obtener la fecha como String
+            String fechaTexto = loteInputFecha.getText(); // Obtener la fecha como String
+            int idArticulo = loteInputArticulo.getSelectedIndex() + 1; // Suponiendo que los IDs coinciden con el índice
+            String nombreUsuarioSeleccionado = (String) loteInputUsuario.getSelectedItem();  // Obtener el nombre del usuario seleccionado
+            int idUsuario = usuarioMap.get(nombreUsuarioSeleccionado);  // Obtener el ID del usuario seleccionado
 
             try {
-                // Convertir el String de fecha a java.sql.Date
-                java.sql.Date fecha = java.sql.Date.valueOf(fechaTexto);
-
+                Date fecha = Date.valueOf(fechaTexto); // Convertir la fecha a java.sql.Date
                 if (!proveedor.isEmpty() && !tipo.isEmpty() && fecha != null) {
                     boolean success = controller.registrarIngreso(proveedor, tipo, fecha, idArticulo, idUsuario);
                     if (success) {
@@ -137,7 +130,7 @@ public class LoteFrame extends JFrame {
                         cargarIngresos();  // Recargar los ingresos después de añadir uno nuevo
                         loteInputProveedor.setText("");
                         loteInputTipo.setText("");
-                        loteInputFecha.setText("");
+                        loteInputFecha.setText(LocalDate.now().toString()); // Reiniciar la fecha a la actual
                     } else {
                         JOptionPane.showMessageDialog(null, "Error al añadir el lote");
                     }
@@ -148,9 +141,5 @@ public class LoteFrame extends JFrame {
                 JOptionPane.showMessageDialog(null, "Formato de fecha inválido. Use yyyy-MM-dd.");
             }
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoteFrame().setVisible(true));
     }
 }
