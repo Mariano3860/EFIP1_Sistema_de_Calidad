@@ -2,7 +2,6 @@ package com.labo.models;
 
 import java.util.Date;
 
-@SuppressWarnings("unused")
 public class Ingreso {
     private final int idIngreso;
     private final String proveedor;

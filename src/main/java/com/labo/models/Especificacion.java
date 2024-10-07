@@ -6,7 +6,6 @@ import java.util.List;
 /**
  * Esta clase representa una Especificación de un artículo.
  */
-@SuppressWarnings("unused")
 public class Especificacion {
     private final int idEspecificacion;
     private final String nombre;

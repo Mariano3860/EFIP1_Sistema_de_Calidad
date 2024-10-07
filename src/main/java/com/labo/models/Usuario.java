@@ -1,6 +1,5 @@
 package com.labo.models;
 
-@SuppressWarnings("unused")
 public class Usuario {
     private final int idUsuario;
     private final String nombre;

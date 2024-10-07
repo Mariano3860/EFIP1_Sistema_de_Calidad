@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 /**
  * Controlador para manejar las operaciones relacionadas con Especificaciones.
  */
-@SuppressWarnings("unused")
 public class EspecificacionController {
     private static final Logger logger = Logger.getLogger(EspecificacionController.class.getName());
 
