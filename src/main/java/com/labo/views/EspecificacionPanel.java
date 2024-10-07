@@ -11,6 +11,7 @@ import javax.swing.table.TableCellEditor;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,8 @@ public class EspecificacionPanel extends JPanel {
     private final AtributoController atributoController;
     private int idEspecificacionSeleccionada = -1; // Para almacenar el ID de la especificación seleccionada
     private final JButton saveButton;
-    private final Map<Integer, String> atributosOriginales = new HashMap<>(); // Guardar nombres originales de los atributos
+    private final Map<Integer, String> atributosOriginales = new HashMap<>();
+    private final List<Object[]> atributosTemporales = new ArrayList<>(); // Lista para almacenar cambios temporales
 
     public EspecificacionPanel() {
         especificacionController = new EspecificacionController();
@@ -43,7 +45,7 @@ public class EspecificacionPanel extends JPanel {
         String[] especificacionColumnNames = {"ID Especificación", "Nombre Especificación", "Artículo"};
         especificacionTableModel = new DefaultTableModel(especificacionColumnNames, 0);
         especificacionTable = new JTable(especificacionTableModel);
-        especificacionTable.setPreferredScrollableViewportSize(new Dimension(400, 150)); // Tamaño ajustado de la tabla
+        especificacionTable.setPreferredScrollableViewportSize(new Dimension(400, 150));
         JScrollPane especificacionScrollPane = new JScrollPane(especificacionTable);
         add(especificacionScrollPane, BorderLayout.NORTH);
 
@@ -53,19 +55,19 @@ public class EspecificacionPanel extends JPanel {
         atributoTable = new JTable(atributoTableModel) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 0 || column == 1 || column == 2 || column == 3; // Hacer que todas las celdas sean editables
+                return column == 0 || column == 1 || column == 2 || column == 3;
             }
 
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
-                if (column == 0) { // Primera columna (Atributo) es un JComboBox
-                    return new DefaultCellEditor(atributoComboBox); // DefaultCellEditor es compatible con TableCellEditor
+                if (column == 0) {
+                    return new DefaultCellEditor(atributoComboBox);
                 }
-                return super.getCellEditor(row, column); // Asegurarse de devolver un TableCellEditor
+                return super.getCellEditor(row, column);
             }
         };
 
-        atributoTable.setPreferredScrollableViewportSize(new Dimension(400, 200)); // Tamaño ajustado de la tabla
+        atributoTable.setPreferredScrollableViewportSize(new Dimension(400, 200));
         JScrollPane atributoScrollPane = new JScrollPane(atributoTable);
 
         // Crear un panel para la tabla de atributos y los botones
@@ -78,7 +80,7 @@ public class EspecificacionPanel extends JPanel {
         JButton addAtributoButton = new JButton("Añadir Atributo");
         JButton deleteAtributoButton = new JButton("Eliminar Atributo");
         saveButton = new JButton("Guardar Especificación");
-        saveButton.setEnabled(false); // Deshabilitar el botón al principio
+        saveButton.setEnabled(false);
         saveButton.addActionListener(new SaveAtributosListener());
 
         attributeButtonPanel.add(addAtributoButton);
@@ -116,7 +118,6 @@ public class EspecificacionPanel extends JPanel {
 
         // Panel de botones principales
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-
         JButton addEspecificacionButton = new JButton("Crear Nueva Especificación");
         JButton deleteEspecificacionButton = new JButton("Eliminar Especificación");
 
@@ -146,30 +147,19 @@ public class EspecificacionPanel extends JPanel {
             }
         });
 
-        // Listener para habilitar el botón de guardar si se modifica la tabla de atributos
-        atributoTableModel.addTableModelListener(e -> {
-            saveButton.setEnabled(true); // Habilitar el botón si se modifica la tabla de atributos
-        });
-
-        // Listener para habilitar el botón de guardar si se modifica el nombre de la especificación
-        especificacionNombreInput.getDocument().addDocumentListener(new SimpleDocumentListener() {
-            @Override
-            public void update() {
-                saveButton.setEnabled(true);
-            }
-        });
+        atributoTableModel.addTableModelListener(e -> saveButton.setEnabled(true));
     }
 
     private void cargarEspecificaciones() {
         List<Especificacion> especificaciones = especificacionController.obtenerEspecificaciones();
-        especificacionTableModel.setRowCount(0);  // Limpiar la tabla antes de cargar los nuevos datos
+        especificacionTableModel.setRowCount(0);
         for (Especificacion especificacion : especificaciones) {
             Object[] rowData = {
                     especificacion.getIdEspecificacion(),
                     especificacion.getNombre(),
                     especificacion.getNombreArticulo()
             };
-            especificacionTableModel.addRow(rowData);  // Agregar cada fila a la tabla
+            especificacionTableModel.addRow(rowData);
         }
     }
 
@@ -178,17 +168,15 @@ public class EspecificacionPanel extends JPanel {
         if (selectedRow >= 0) {
             idEspecificacionSeleccionada = (int) especificacionTableModel.getValueAt(selectedRow, 0);
             List<Object[]> atributos = especificacionController.obtenerAtributosPorEspecificacion(idEspecificacionSeleccionada);
-            atributoTableModel.setRowCount(0);  // Limpiar la tabla antes de cargar los atributos
-            atributosOriginales.clear(); // Limpiar los atributos originales antes de cargar nuevos datos
+            atributoTableModel.setRowCount(0);
+            atributosTemporales.clear(); // Limpiar la lista temporal antes de cargar los nuevos datos
 
-            for (int i = 0; i < atributos.size(); i++) {
-                Object[] atributo = atributos.get(i);
-                atributoTableModel.addRow(atributo);  // Agregar los atributos a la tabla
-                // Guardar el nombre original del atributo para comparaciones
-                atributosOriginales.put(i, (String) atributo[0]);
+            for (Object[] atributo : atributos) {
+                atributoTableModel.addRow(atributo);
+                atributosTemporales.add(atributo.clone());  // Guardar una copia en la lista temporal
             }
         }
-        saveButton.setEnabled(false); // Deshabilitar el botón de guardar al cargar los atributos
+        saveButton.setEnabled(false);
     }
 
     // Listener para crear una nueva especificación
@@ -218,7 +206,10 @@ public class EspecificacionPanel extends JPanel {
     private class AddAtributoListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            atributoTableModel.addRow(new Object[]{"", "", "", ""}); // Añadir una nueva fila vacía para el atributo
+            Object[] nuevoAtributo = {"", "", "", ""};
+            atributoTableModel.addRow(nuevoAtributo);  // Añadir el nuevo atributo temporalmente
+            atributosTemporales.add(nuevoAtributo); // Añadirlo a la lista temporal
+            saveButton.setEnabled(true); // Habilitar el botón de guardar
         }
     }
 
@@ -228,14 +219,9 @@ public class EspecificacionPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             int selectedRow = atributoTable.getSelectedRow();
             if (selectedRow >= 0) {
-                String atributoSeleccionado = (String) atributoTableModel.getValueAt(selectedRow, 0);
-                int idAtributo = atributoController.obtenerIdAtributo(atributoSeleccionado);
-                boolean eliminado = especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributo); // Llamada a eliminar en la base de datos
-                if (eliminado) {
-                    atributoTableModel.removeRow(selectedRow); // Eliminar visualmente la fila si se elimina en la BD
-                } else {
-                    JOptionPane.showMessageDialog(null, "Error al eliminar el atributo.");
-                }
+                atributoTableModel.removeRow(selectedRow);
+                atributosTemporales.remove(selectedRow); // Eliminar también de la lista temporal
+                saveButton.setEnabled(true); // Habilitar el botón de guardar
             } else {
                 JOptionPane.showMessageDialog(null, "Seleccione un atributo para eliminar.");
             }
@@ -279,72 +265,42 @@ public class EspecificacionPanel extends JPanel {
                 }
             }
 
-            if (idEspecificacionSeleccionada != -1) {
-                boolean success = true;
-                for (int i = 0; i < atributoTableModel.getRowCount(); i++) {
-                    String atributoSeleccionado = (String) atributoTableModel.getValueAt(i, 0);
+            boolean success = true;
+            for (int i = 0; i < atributoTableModel.getRowCount(); i++) {
+                String atributoSeleccionado = (String) atributoTableModel.getValueAt(i, 0);
 
-                    Object valorMinObj = atributoTableModel.getValueAt(i, 1);
-                    Object valorMaxObj = atributoTableModel.getValueAt(i, 2);
-                    String unidadMedida = (String) atributoTableModel.getValueAt(i, 3);
+                // Obtener los valores mínimos y máximos
+                Object valorMinObj = atributoTableModel.getValueAt(i, 1);
+                Object valorMaxObj = atributoTableModel.getValueAt(i, 2);
+                String unidadMedida = (String) atributoTableModel.getValueAt(i, 3);
 
-                    double valorMin, valorMax;
-
-                    try {
-                        valorMin = (valorMinObj instanceof String) ? Double.parseDouble((String) valorMinObj) : (Double) valorMinObj;
-                        valorMax = (valorMaxObj instanceof String) ? Double.parseDouble((String) valorMaxObj) : (Double) valorMaxObj;
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(null, "Error en los valores numéricos. Por favor ingrese valores válidos.");
-                        return;
-                    }
-
-                    if (!atributoSeleccionado.isEmpty() && valorMin >= 0 && valorMax >= 0 && !unidadMedida.isEmpty()) {
-                        int idAtributo = atributoController.obtenerIdAtributo(atributoSeleccionado);
-
-                        // Verificar si el atributo fue modificado
-                        String nombreOriginal = atributosOriginales.get(i);
-                        if (nombreOriginal != null && !nombreOriginal.equals(atributoSeleccionado)) {
-                            // Si el nombre cambió, eliminar el atributo anterior
-                            int idAtributoOriginal = atributoController.obtenerIdAtributo(nombreOriginal);
-                            especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributoOriginal);
-                        }
-
-                        success &= especificacionController.agregarAtributoAEspecificacion(
-                                idEspecificacionSeleccionada,
-                                idAtributo,
-                                valorMin,
-                                valorMax,
-                                unidadMedida
-                        );
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos del atributo.");
-                        return;
-                    }
+                // Verificar que no estén vacíos
+                if (atributoSeleccionado.isEmpty() || valorMinObj == null || valorMaxObj == null || unidadMedida.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos del atributo.");
+                    return;
                 }
-                if (success) {
-                    JOptionPane.showMessageDialog(null, "Todos los atributos guardados exitosamente");
-                    cargarAtributosDeEspecificacion();  // Recargar los atributos de la especificación seleccionada
-                } else {
-                    JOptionPane.showMessageDialog(null, "Error al guardar los atributos");
+
+                double valorMin, valorMax;
+
+                try {
+                    valorMin = Double.parseDouble(valorMinObj.toString());
+                    valorMax = Double.parseDouble(valorMaxObj.toString());
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Error en los valores numéricos. Por favor ingrese valores válidos.");
+                    return;
                 }
+
+                int idAtributo = atributoController.obtenerIdAtributo(atributoSeleccionado);
+                success &= especificacionController.agregarAtributoAEspecificacion(idEspecificacionSeleccionada, idAtributo, valorMin, valorMax, unidadMedida);
+            }
+
+            if (success) {
+                JOptionPane.showMessageDialog(null, "Todos los atributos guardados exitosamente");
+                cargarAtributosDeEspecificacion();  // Recargar los atributos después de guardar
+            } else {
+                JOptionPane.showMessageDialog(null, "Error al guardar los atributos");
             }
         }
     }
 
-    // Implementación de SimpleDocumentListener para detectar cambios en el JTextField
-    private abstract static class SimpleDocumentListener implements javax.swing.event.DocumentListener {
-        public abstract void update();
-        @Override
-        public void insertUpdate(javax.swing.event.DocumentEvent e) {
-            update();
-        }
-        @Override
-        public void removeUpdate(javax.swing.event.DocumentEvent e) {
-            update();
-        }
-        @Override
-        public void changedUpdate(javax.swing.event.DocumentEvent e) {
-            update();
-        }
-    }
 }
