@@ -92,17 +92,20 @@ public class EspecificacionPanel extends JPanel {
         JButton addEspecificacionButton = new JButton("Crear Nueva Especificación");
         JButton addAtributoButton = new JButton("Añadir Atributo");
         JButton deleteAtributoButton = new JButton("Eliminar Atributo");
+        JButton deleteEspecificacionButton = new JButton("Eliminar Especificación"); // Nuevo botón de eliminar especificación
         saveButton = new JButton("Guardar Atributos");
         saveButton.setEnabled(false); // Deshabilitar el botón al principio
 
         addEspecificacionButton.addActionListener(new AddEspecificacionListener());
         addAtributoButton.addActionListener(new AddAtributoListener());
         deleteAtributoButton.addActionListener(new DeleteAtributoListener());
+        deleteEspecificacionButton.addActionListener(new DeleteEspecificacionListener()); // Listener del nuevo botón
         saveButton.addActionListener(new SaveAtributosListener());
 
         buttonPanel.add(addEspecificacionButton);
         buttonPanel.add(addAtributoButton);
         buttonPanel.add(deleteAtributoButton);
+        buttonPanel.add(deleteEspecificacionButton); // Agregar botón al panel
         buttonPanel.add(saveButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
@@ -203,6 +206,31 @@ public class EspecificacionPanel extends JPanel {
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Seleccione un atributo para eliminar.");
+            }
+        }
+    }
+
+    // Listener para eliminar una especificación completa
+    private class DeleteEspecificacionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int selectedRow = especificacionTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                int idEspecificacion = (int) especificacionTableModel.getValueAt(selectedRow, 0);
+
+                // Confirmar con el usuario antes de eliminar
+                int confirm = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea eliminar esta especificación?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    boolean eliminado = especificacionController.eliminarEspecificacion(idEspecificacion);
+                    if (eliminado) {
+                        cargarEspecificaciones(); // Recargar la tabla de especificaciones después de eliminar
+                        JOptionPane.showMessageDialog(null, "Especificación eliminada exitosamente.");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Error al eliminar la especificación.");
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Seleccione una especificación para eliminar.");
             }
         }
     }

@@ -167,6 +167,13 @@ public class EspecificacionController {
         return success;
     }
 
+    /**
+     * Mét.odo para eliminar un atributo a una especificación existente.
+     *
+     * @param idEspecificacion  ID de la especificación.
+     * @param idAtributo         id de atributo.
+     * @return True si el atributo se eliminó correctamente, False si hubo algún error.
+     */
     public boolean eliminarAtributoDeEspecificacion(int idEspecificacion, int idAtributo) {
         String deleteQuery = "DELETE FROM EspecificacionAtributo WHERE idEspecificacion = ? AND idAtributo = ?";
 
@@ -188,6 +195,51 @@ public class EspecificacionController {
 
         } catch (SQLException e) {
             Logger.getLogger(EspecificacionController.class.getName()).log(Level.SEVERE, "Error al eliminar el atributo de la especificación", e);
+            return false;
+        }
+    }
+
+    /**
+     * Mét.odo para eliminar una especificacion existente.
+     *
+     * @param idEspecificacion  ID de la especificación.
+     * @return True si la especificacion se eliminó correctamente, False si hubo algún error.
+     */
+    public boolean eliminarEspecificacion(int idEspecificacion) {
+        String deleteAtributosQuery = "DELETE FROM EspecificacionAtributo WHERE idEspecificacion = ?";
+        String deleteEspecificacionQuery = "DELETE FROM Especificacion WHERE idEspecificacion = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            connection.setAutoCommit(false); // Deshabilitar el autocommit para manejar transacciones
+
+            try (PreparedStatement deleteAtributosStmt = connection.prepareStatement(deleteAtributosQuery);
+                 PreparedStatement deleteEspecificacionStmt = connection.prepareStatement(deleteEspecificacionQuery)) {
+
+                // Primero, eliminar los atributos relacionados con la especificación
+                deleteAtributosStmt.setInt(1, idEspecificacion);
+                deleteAtributosStmt.executeUpdate();
+
+                // Luego, eliminar la especificación
+                deleteEspecificacionStmt.setInt(1, idEspecificacion);
+                int rowsAffected = deleteEspecificacionStmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    connection.commit(); // Hacer commit si todo salió bien
+                    return true;
+                } else {
+                    connection.rollback(); // Revertir cambios si algo falló
+                    Logger.getLogger(EspecificacionController.class.getName()).log(Level.WARNING, "No se eliminó la especificación con idEspecificacion = " + idEspecificacion);
+                    return false;
+                }
+
+            } catch (SQLException e) {
+                connection.rollback(); // Revertir cambios si ocurre un error
+                Logger.getLogger(EspecificacionController.class.getName()).log(Level.SEVERE, "Error al eliminar la especificación", e);
+                return false;
+            }
+
+        } catch (SQLException e) {
+            Logger.getLogger(EspecificacionController.class.getName()).log(Level.SEVERE, "Error en la conexión al eliminar la especificación", e);
             return false;
         }
     }
