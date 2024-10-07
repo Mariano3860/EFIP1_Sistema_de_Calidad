@@ -180,7 +180,6 @@ public class EspecificacionController {
             // Ejecutar la consulta y verificar si se eliminó al menos una fila
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-                Logger.getLogger(EspecificacionController.class.getName()).log(Level.INFO, "Atributo eliminado correctamente");
                 return true;
             } else {
                 Logger.getLogger(EspecificacionController.class.getName()).log(Level.WARNING, "No se eliminó el atributo, no se encontró la combinación idEspecificacion = " + idEspecificacion + " e idAtributo = " + idAtributo);

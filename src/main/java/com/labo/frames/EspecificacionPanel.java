@@ -13,7 +13,9 @@ import javax.swing.event.TableModelListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Esta clase representa el panel para gestionar las especificaciones.
@@ -34,6 +36,7 @@ public class EspecificacionPanel extends JPanel {
     private final AtributoController atributoController;
     private int idEspecificacionSeleccionada = -1; // Para almacenar el ID de la especificación seleccionada
     private final JButton saveButton;
+    private Map<Integer, String> atributosOriginales = new HashMap<>(); // Para guardar los nombres originales de los atributos
 
     public EspecificacionPanel() {
         especificacionController = new EspecificacionController();
@@ -153,9 +156,13 @@ public class EspecificacionPanel extends JPanel {
             idEspecificacionSeleccionada = (int) especificacionTableModel.getValueAt(selectedRow, 0);
             List<Object[]> atributos = especificacionController.obtenerAtributosPorEspecificacion(idEspecificacionSeleccionada);
             atributoTableModel.setRowCount(0);  // Limpiar la tabla antes de cargar los atributos
+            atributosOriginales.clear(); // Limpiar los atributos originales antes de cargar nuevos datos
 
-            for (Object[] atributo : atributos) {
+            for (int i = 0; i < atributos.size(); i++) {
+                Object[] atributo = atributos.get(i);
                 atributoTableModel.addRow(atributo);  // Agregar los atributos a la tabla
+                // Guardar el nombre original del atributo para comparaciones
+                atributosOriginales.put(i, (String) atributo[0]);
             }
         }
         saveButton.setEnabled(false); // Deshabilitar el botón de guardar al cargar los atributos
@@ -242,10 +249,12 @@ public class EspecificacionPanel extends JPanel {
                     if (!atributoSeleccionado.isEmpty() && valorMin >= 0 && valorMax >= 0 && !unidadMedida.isEmpty()) {
                         int idAtributo = atributoController.obtenerIdAtributo(atributoSeleccionado);
 
-                        // Eliminar el atributo existente si se ha cambiado su nombre
-                        int idAtributoActual = obtenerIdAtributoActualDeFila(i); // Mét.odo para obtener el ID del atributo antes de la edición
-                        if (idAtributoActual != idAtributo) {
-                            especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributoActual);
+                        // Verificar si el atributo fue modificado
+                        String nombreOriginal = atributosOriginales.get(i);
+                        if (nombreOriginal != null && !nombreOriginal.equals(atributoSeleccionado)) {
+                            // Si el nombre cambió, eliminar el atributo anterior
+                            int idAtributoOriginal = atributoController.obtenerIdAtributo(nombreOriginal);
+                            especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributoOriginal);
                         }
 
                         success &= especificacionController.agregarAtributoAEspecificacion(
@@ -269,19 +278,4 @@ public class EspecificacionPanel extends JPanel {
             }
         }
     }
-
-    private int obtenerIdAtributoActualDeFila(int fila) {
-        // Obtener el nombre del atributo en la fila correspondiente
-        String nombreAtributo = (String) atributoTableModel.getValueAt(fila, 0);
-
-        // Verificar que el nombre del atributo no esté vacío
-        if (nombreAtributo != null && !nombreAtributo.trim().isEmpty()) {
-            // Usar el AtributoController para obtener el ID del atributo en la base de datos
-            return atributoController.obtenerIdAtributo(nombreAtributo);
-        } else {
-            // Si no se puede obtener un nombre válido, devolver -1 o algún valor que indique que no se encontró el ID
-            return -1;
-        }
-    }
-
 }
