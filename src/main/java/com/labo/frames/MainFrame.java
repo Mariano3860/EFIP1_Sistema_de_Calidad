@@ -8,14 +8,13 @@ import javax.swing.*;
  * para LotePanel y otra para EspecificacionPanel.
  */
 public class MainFrame extends JFrame {
-    private JTabbedPane tabbedPane;
 
     public MainFrame() {
         // Título de la ventana principal
         setTitle("Sistema de Gestión de Calidad");
 
         // Inicializamos el JTabbedPane que contendrá las pestañas
-        tabbedPane = new JTabbedPane();
+        JTabbedPane tabbedPane = new JTabbedPane();
 
         // Creamos las instancias de los paneles que actuarán como las pestañas
         JPanel lotePanel = new LotePanel();  // Panel para el LotePanel
@@ -37,6 +36,6 @@ public class MainFrame extends JFrame {
 
     public static void main(String[] args) {
         // Ejecutamos la ventana principal en el hilo de eventos de Swing
-        SwingUtilities.invokeLater(() -> new MainFrame());
+        SwingUtilities.invokeLater(MainFrame::new);  // Referencia de mét.odo
     }
 }

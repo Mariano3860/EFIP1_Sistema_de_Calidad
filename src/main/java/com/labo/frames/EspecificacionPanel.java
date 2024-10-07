@@ -8,8 +8,6 @@ import com.labo.models.Especificacion;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,15 +26,12 @@ public class EspecificacionPanel extends JPanel {
     private final JTextField especificacionNombreInput;
     private final JComboBox<String> articuloComboBox;
     private final JComboBox<String> atributoComboBox;
-    private final JTextField valorMinInput;
-    private final JTextField valorMaxInput;
-    private final JTextField unidadMedidaInput;
     private final EspecificacionController especificacionController;
     private final ArticuloController articuloController;
     private final AtributoController atributoController;
     private int idEspecificacionSeleccionada = -1; // Para almacenar el ID de la especificación seleccionada
     private final JButton saveButton;
-    private Map<Integer, String> atributosOriginales = new HashMap<>(); // Para guardar los nombres originales de los atributos
+    private final Map<Integer, String> atributosOriginales = new HashMap<>(); // Guardar nombres originales de los atributos
 
     public EspecificacionPanel() {
         especificacionController = new EspecificacionController();
@@ -75,7 +70,7 @@ public class EspecificacionPanel extends JPanel {
         add(atributoScrollPane, BorderLayout.CENTER);
 
         // Panel de entrada de datos para crear/modificar especificación
-        JPanel inputPanel = new JPanel(new GridLayout(4, 2));
+        JPanel inputPanel = new JPanel(new GridLayout(2, 2));
 
         especificacionNombreInput = new JTextField();
         List<String> articulos = articuloController.obtenerNombresArticulos();
@@ -83,10 +78,6 @@ public class EspecificacionPanel extends JPanel {
 
         List<String> atributos = atributoController.obtenerNombresAtributos();
         atributoComboBox = new JComboBox<>(atributos.toArray(new String[0]));
-
-        valorMinInput = new JTextField();
-        valorMaxInput = new JTextField();
-        unidadMedidaInput = new JTextField();
 
         inputPanel.add(new JLabel("Nombre Especificación:"));
         inputPanel.add(especificacionNombreInput);
@@ -127,12 +118,9 @@ public class EspecificacionPanel extends JPanel {
         });
 
         // Listener para habilitar el botón de guardar si se modifica la tabla de atributos
-        atributoTableModel.addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                if (atributoTableModel.getRowCount() > 0) {
-                    saveButton.setEnabled(true); // Habilitar el botón si hay filas en la tabla de atributos
-                }
+        atributoTableModel.addTableModelListener(e -> {
+            if (atributoTableModel.getRowCount() > 0) {
+                saveButton.setEnabled(true); // Habilitar el botón si hay filas en la tabla de atributos
             }
         });
     }
@@ -207,8 +195,12 @@ public class EspecificacionPanel extends JPanel {
             if (selectedRow >= 0) {
                 String atributoSeleccionado = (String) atributoTableModel.getValueAt(selectedRow, 0);
                 int idAtributo = atributoController.obtenerIdAtributo(atributoSeleccionado);
-                especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributo); // Llamada a eliminar en la base de datos
-                atributoTableModel.removeRow(selectedRow); // Eliminar visualmente la fila
+                boolean eliminado = especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributo); // Llamada a eliminar en la base de datos
+                if (eliminado) {
+                    atributoTableModel.removeRow(selectedRow); // Eliminar visualmente la fila si se elimina en la BD
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error al eliminar el atributo.");
+                }
             } else {
                 JOptionPane.showMessageDialog(null, "Seleccione un atributo para eliminar.");
             }

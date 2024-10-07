@@ -2,6 +2,7 @@ package com.labo.frames;
 
 import com.labo.controllers.LoteController;
 import com.labo.controllers.UsuarioController;
+import com.labo.models.Articulo;
 import com.labo.models.Ingreso;
 import com.labo.models.Usuario;
 
@@ -9,8 +10,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -21,7 +20,6 @@ import java.util.Map;
  * Esta clase representa el panel para gestionar los ingresos de lotes.
  */
 public class LotePanel extends JPanel {
-    private final JTable loteTable;
     private final DefaultTableModel tableModel;
     private final JTextField loteInputProveedor;
     private final JTextField loteInputTipo;
@@ -29,19 +27,18 @@ public class LotePanel extends JPanel {
     private final JComboBox<String> loteInputUsuario;
     private final JTextField loteInputFecha;
     private final LoteController controller;
-    private final UsuarioController usuarioController;
     private final Map<String, Integer> usuarioMap; // Map para asociar nombre de usuario con su ID
 
     public LotePanel() {
         controller = new LoteController();
-        usuarioController = new UsuarioController(); // Crear instancia del controlador de usuarios
+        UsuarioController usuarioController = new UsuarioController(); // Variable local en lugar de campo
         usuarioMap = new HashMap<>(); // Inicializar el Map de usuarios
         setLayout(new BorderLayout());
 
         // Definir las columnas de la tabla
         String[] columnNames = {"ID Ingreso", "Proveedor", "Tipo", "Fecha", "Artículo", "Usuario"};
         tableModel = new DefaultTableModel(columnNames, 0);
-        loteTable = new JTable(tableModel);
+        JTable loteTable = new JTable(tableModel); // Variable local en lugar de campo
 
         // Habilitar la ordenación por columnas
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
@@ -63,7 +60,7 @@ public class LotePanel extends JPanel {
         loteInputFecha = new JTextField(LocalDate.now().toString()); // Inicializa la fecha con la fecha actual
 
         // Obtener los nombres de los artículos desde el controlador
-        List<String> articulos = controller.obtenerArticulos().stream().map(articulo -> articulo.getNombre()).toList();
+        List<String> articulos = controller.obtenerArticulos().stream().map(Articulo::getNombre).toList();
         loteInputArticulo = new JComboBox<>(articulos.toArray(new String[0]));
 
         // Obtener los nombres de los usuarios y sus IDs desde el UsuarioController
@@ -85,35 +82,7 @@ public class LotePanel extends JPanel {
         inputPanel.add(loteInputUsuario);
 
         JButton addButton = new JButton("Añadir Lote");
-        addButton.addActionListener(new AddLoteListener());
-
-        inputPanel.add(new JLabel());
-        inputPanel.add(addButton);
-
-        add(inputPanel, BorderLayout.SOUTH);
-
-        cargarIngresos();
-    }
-
-    private void cargarIngresos() {
-        List<Ingreso> ingresos = controller.obtenerIngresosConArticuloYUsuario();
-        tableModel.setRowCount(0);  // Limpiar la tabla antes de cargar los nuevos datos
-        for (Ingreso ingreso : ingresos) {
-            Object[] rowData = {
-                    ingreso.getIdIngreso(),
-                    ingreso.getProveedor(),
-                    ingreso.getTipo(),
-                    ingreso.getFecha(),
-                    ingreso.getNombreArticulo(),
-                    ingreso.getNombreUsuario()
-            };
-            tableModel.addRow(rowData);  // Agregar cada fila a la tabla
-        }
-    }
-
-    private class AddLoteListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
+        addButton.addActionListener(e -> {
             String proveedor = loteInputProveedor.getText();
             String tipo = loteInputTipo.getText();
             String fechaTexto = loteInputFecha.getText(); // Obtener la fecha como String
@@ -140,6 +109,29 @@ public class LotePanel extends JPanel {
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(null, "Formato de fecha inválido. Use yyyy-MM-dd.");
             }
+        });
+
+        inputPanel.add(new JLabel());
+        inputPanel.add(addButton);
+
+        add(inputPanel, BorderLayout.SOUTH);
+
+        cargarIngresos();
+    }
+
+    private void cargarIngresos() {
+        List<Ingreso> ingresos = controller.obtenerIngresosConArticuloYUsuario();
+        tableModel.setRowCount(0);  // Limpiar la tabla antes de cargar los nuevos datos
+        for (Ingreso ingreso : ingresos) {
+            Object[] rowData = {
+                    ingreso.getIdIngreso(),
+                    ingreso.getProveedor(),
+                    ingreso.getTipo(),
+                    ingreso.getFecha(),
+                    ingreso.getNombreArticulo(),
+                    ingreso.getNombreUsuario()
+            };
+            tableModel.addRow(rowData);  // Agregar cada fila a la tabla
         }
     }
 }
