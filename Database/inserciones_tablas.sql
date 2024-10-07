@@ -1,6 +1,6 @@
 -- Inserciones en la tabla  Usuario
 INSERT INTO Usuario (idUsuario, nombre, email, contraseña)
-VALUES (1, 'Juan', 'juan@labo.com', 'password123'),
+VALUES (1, 'admin', 'admin', 'admin'),
        (2, 'Caro', 'caro@labo.com', 'password123'),
        (3, 'Gonzalo', 'gonzalo@labo.com', 'password123');
 

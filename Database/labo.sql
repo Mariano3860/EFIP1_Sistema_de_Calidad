@@ -296,7 +296,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,'Juan','juan@example.com','password123'),(2,'Caro','caro@example.com','password123'),(3,'Gonzalo','gonzalo@example.com','password123');
+INSERT INTO `usuario` VALUES (1,'admin','admin','admin'),(2,'Caro','caro@example.com','password123'),(3,'Gonzalo','gonzalo@example.com','password123');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

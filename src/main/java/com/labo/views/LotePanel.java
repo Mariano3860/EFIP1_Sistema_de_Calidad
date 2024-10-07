@@ -1,4 +1,4 @@
-package com.labo.frames;
+package com.labo.views;
 
 import com.labo.controllers.LoteController;
 import com.labo.controllers.UsuarioController;

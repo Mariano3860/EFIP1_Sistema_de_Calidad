@@ -1,4 +1,4 @@
-package com.labo.frames;
+package com.labo.views;
 
 import javax.swing.*;
 

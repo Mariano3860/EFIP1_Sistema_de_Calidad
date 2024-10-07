@@ -1,6 +1,6 @@
 package com.labo.controllers;
 
-import com.labo.database.DatabaseConnection;
+import com.labo.dao.DatabaseConnection;
 import com.labo.models.Atributo;
 import com.labo.models.Especificacion;
 
