@@ -166,4 +166,31 @@ public class EspecificacionController {
         }
         return success;
     }
+
+    public boolean eliminarAtributoDeEspecificacion(int idEspecificacion, int idAtributo) {
+        String deleteQuery = "DELETE FROM EspecificacionAtributo WHERE idEspecificacion = ? AND idAtributo = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(deleteQuery)) {
+
+            // Configurar los parámetros de la consulta
+            statement.setInt(1, idEspecificacion);
+            statement.setInt(2, idAtributo);
+
+            // Ejecutar la consulta y verificar si se eliminó al menos una fila
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected > 0) {
+                Logger.getLogger(EspecificacionController.class.getName()).log(Level.INFO, "Atributo eliminado correctamente");
+                return true;
+            } else {
+                Logger.getLogger(EspecificacionController.class.getName()).log(Level.WARNING, "No se eliminó el atributo, no se encontró la combinación idEspecificacion = " + idEspecificacion + " e idAtributo = " + idAtributo);
+                return false;
+            }
+
+        } catch (SQLException e) {
+            Logger.getLogger(EspecificacionController.class.getName()).log(Level.SEVERE, "Error al eliminar el atributo de la especificación", e);
+            return false;
+        }
+    }
+
 }

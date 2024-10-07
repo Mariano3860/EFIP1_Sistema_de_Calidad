@@ -1,6 +1,7 @@
 package com.labo.frames;
 
 import com.labo.controllers.UsuarioController;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -26,6 +27,18 @@ public class LoginFrame extends JFrame {
 
         JButton loginButton = new JButton("Login");
         loginButton.addActionListener(new LoginButtonListener());
+
+        // Asignar acción para la tecla Enter
+        InputMap inputMap = panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = panel.getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "login");
+        actionMap.put("login", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loginButton.doClick(); // Simula un clic en el botón de login
+            }
+        });
 
         panel.add(userLabel);
         panel.add(userField);

@@ -97,15 +97,18 @@ public class EspecificacionPanel extends JPanel {
 
         JButton addEspecificacionButton = new JButton("Crear Nueva Especificación");
         JButton addAtributoButton = new JButton("Añadir Atributo");
+        JButton deleteAtributoButton = new JButton("Eliminar Atributo");
         saveButton = new JButton("Guardar Atributos");
         saveButton.setEnabled(false); // Deshabilitar el botón al principio
 
         addEspecificacionButton.addActionListener(new AddEspecificacionListener());
         addAtributoButton.addActionListener(new AddAtributoListener());
+        deleteAtributoButton.addActionListener(new DeleteAtributoListener());
         saveButton.addActionListener(new SaveAtributosListener());
 
         buttonPanel.add(addEspecificacionButton);
         buttonPanel.add(addAtributoButton);
+        buttonPanel.add(deleteAtributoButton);
         buttonPanel.add(saveButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
@@ -189,6 +192,22 @@ public class EspecificacionPanel extends JPanel {
         }
     }
 
+    // Listener para eliminar una fila de atributo
+    private class DeleteAtributoListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int selectedRow = atributoTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                String atributoSeleccionado = (String) atributoTableModel.getValueAt(selectedRow, 0);
+                int idAtributo = atributoController.obtenerIdAtributo(atributoSeleccionado);
+                especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributo); // Llamada a eliminar en la base de datos
+                atributoTableModel.removeRow(selectedRow); // Eliminar visualmente la fila
+            } else {
+                JOptionPane.showMessageDialog(null, "Seleccione un atributo para eliminar.");
+            }
+        }
+    }
+
     // Listener para guardar todos los atributos añadidos o modificados a una especificación
     private class SaveAtributosListener implements ActionListener {
         @Override
@@ -222,6 +241,13 @@ public class EspecificacionPanel extends JPanel {
 
                     if (!atributoSeleccionado.isEmpty() && valorMin >= 0 && valorMax >= 0 && !unidadMedida.isEmpty()) {
                         int idAtributo = atributoController.obtenerIdAtributo(atributoSeleccionado);
+
+                        // Eliminar el atributo existente si se ha cambiado su nombre
+                        int idAtributoActual = obtenerIdAtributoActualDeFila(i); // Mét.odo para obtener el ID del atributo antes de la edición
+                        if (idAtributoActual != idAtributo) {
+                            especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributoActual);
+                        }
+
                         success &= especificacionController.agregarAtributoAEspecificacion(
                                 idEspecificacionSeleccionada,
                                 idAtributo,
@@ -243,4 +269,19 @@ public class EspecificacionPanel extends JPanel {
             }
         }
     }
+
+    private int obtenerIdAtributoActualDeFila(int fila) {
+        // Obtener el nombre del atributo en la fila correspondiente
+        String nombreAtributo = (String) atributoTableModel.getValueAt(fila, 0);
+
+        // Verificar que el nombre del atributo no esté vacío
+        if (nombreAtributo != null && !nombreAtributo.trim().isEmpty()) {
+            // Usar el AtributoController para obtener el ID del atributo en la base de datos
+            return atributoController.obtenerIdAtributo(nombreAtributo);
+        } else {
+            // Si no se puede obtener un nombre válido, devolver -1 o algún valor que indique que no se encontró el ID
+            return -1;
+        }
+    }
+
 }
