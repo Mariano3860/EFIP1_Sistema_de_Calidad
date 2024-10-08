@@ -25,6 +25,13 @@ public class EspecificacionController {
         }
     }
 
+    // Clase de excepción personalizada
+    public static class EspecificacionConCalificacionesException extends Exception {
+        public EspecificacionConCalificacionesException(String message) {
+            super(message);
+        }
+    }
+
     /**
      * Método para obtener todas las especificaciones sin repetir por atributos.
      *
@@ -188,7 +195,7 @@ public class EspecificacionController {
      * @param idEspecificacion  ID de la especificación.
      * @return True si la especificacion se eliminó correctamente, False si hubo algún error.
      */
-    public boolean eliminarEspecificacion(int idEspecificacion) {
+    public boolean eliminarEspecificacion(int idEspecificacion) throws EspecificacionConCalificacionesException {
         String deleteAtributosQuery = "DELETE FROM EspecificacionAtributo WHERE idEspecificacion = ?";
         String deleteEspecificacionQuery = "DELETE FROM Especificacion WHERE idEspecificacion = ?";
 
@@ -217,6 +224,9 @@ public class EspecificacionController {
 
             } catch (SQLException e) {
                 connection.rollback(); // Revertir cambios si ocurre un error
+                if (e.getSQLState().equals("23000")) { // Código de estado SQL para violación de restricción de clave foránea
+                    throw new EspecificacionConCalificacionesException("No se puede eliminar la especificación porque tiene calificaciones asociadas.");
+                }
                 Logger.getLogger(EspecificacionController.class.getName()).log(Level.SEVERE, "Error al eliminar la especificación", e);
                 return false;
             }

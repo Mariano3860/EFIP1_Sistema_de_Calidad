@@ -256,15 +256,18 @@ public class EspecificacionPanel extends JPanel {
             if (selectedRow >= 0) {
                 int idEspecificacion = (int) especificacionTableModel.getValueAt(selectedRow, 0);
 
-                // Confirmar con el usuario antes de eliminar
                 int confirm = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea eliminar esta especificación?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    boolean eliminado = especificacionController.eliminarEspecificacion(idEspecificacion);
-                    if (eliminado) {
-                        cargarEspecificaciones(); // Recargar la tabla de especificaciones después de eliminar
-                        JOptionPane.showMessageDialog(null, "Especificación eliminada exitosamente.");
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Error al eliminar la especificación.");
+                    try {
+                        boolean eliminado = especificacionController.eliminarEspecificacion(idEspecificacion);
+                        if (eliminado) {
+                            cargarEspecificaciones(); // Recargar la tabla después de eliminar
+                            JOptionPane.showMessageDialog(null, "Especificación eliminada exitosamente.");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Error al eliminar la especificación.");
+                        }
+                    } catch (EspecificacionController.EspecificacionConCalificacionesException ex) {
+                        JOptionPane.showMessageDialog(null, ex.getMessage());
                     }
                 }
             } else {

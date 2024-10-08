@@ -131,12 +131,16 @@ public class IngresoPanel extends JPanel {
                 int idIngreso = (int) tableModel.getValueAt(selectedRow, 0);
                 int confirm = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea eliminar este ingreso?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    boolean eliminado = ingresoController.eliminarIngreso(idIngreso);
-                    if (eliminado) {
-                        cargarIngresos(); // Recargar la tabla después de eliminar
-                        JOptionPane.showMessageDialog(null, "Ingreso eliminado exitosamente.");
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Error al eliminar el ingreso.");
+                    try {
+                        boolean eliminado = ingresoController.eliminarIngreso(idIngreso);
+                        if (eliminado) {
+                            cargarIngresos(); // Recargar la tabla después de eliminar
+                            JOptionPane.showMessageDialog(null, "Ingreso eliminado exitosamente.");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Error al eliminar el ingreso.");
+                        }
+                    } catch (IngresoController.IngresoConCalificacionesException ex) {
+                        JOptionPane.showMessageDialog(null, ex.getMessage());
                     }
                 }
             } else {
