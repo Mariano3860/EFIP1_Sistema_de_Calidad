@@ -18,6 +18,13 @@ import java.util.logging.Logger;
 public class EspecificacionController {
     private static final Logger logger = Logger.getLogger(EspecificacionController.class.getName());
 
+    // Clase de excepción personalizada
+    public static class AtributoConCalificacionesException extends Exception {
+        public AtributoConCalificacionesException(String message) {
+            super(message);
+        }
+    }
+
     /**
      * Método para obtener todas las especificaciones sin repetir por atributos.
      *
@@ -142,13 +149,6 @@ public class EspecificacionController {
         }
     }
 
-    // Clase de excepción personalizada
-    public static class AtributoConCalificacionesException extends Exception {
-        public AtributoConCalificacionesException(String message) {
-            super(message);
-        }
-    }
-
     /**
      * Método para eliminar un atributo a una especificación existente.
      *
@@ -237,7 +237,6 @@ public class EspecificacionController {
      * @param unidadMedida      Unidad de medida.
      * @return True si el atributo se actualizó correctamente, False si hubo un error.
      */
-// Método para modificar un atributo en una especificación existente
     public boolean modificarAtributoDeEspecificacion(int idEspecificacion, int idAtributo, double valorMin, double valorMax, String unidadMedida) {
         String updateQuery = "UPDATE EspecificacionAtributo SET valorMin = ?, valorMax = ?, unidadMedida = ? " +
                 "WHERE idEspecificacion = ? AND idAtributo = ?";
