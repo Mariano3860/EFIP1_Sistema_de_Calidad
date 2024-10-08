@@ -18,7 +18,7 @@ public class AtributoController {
     private static final Logger logger = Logger.getLogger(AtributoController.class.getName());
 
     /**
-     * Mét.odo para obtener la lista de nombres de los atributos.
+     * Método para obtener la lista de nombres de los atributos.
      *
      * @return Lista de nombres de atributos.
      */
@@ -41,7 +41,7 @@ public class AtributoController {
     }
 
     /**
-     * Mét.odo para obtener el ID de un atributo dado su nombre.
+     * Método para obtener el ID de un atributo dado su nombre.
      *
      * @param nombreAtributo El nombre del atributo.
      * @return El ID del atributo.

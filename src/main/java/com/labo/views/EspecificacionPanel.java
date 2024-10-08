@@ -12,9 +12,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Esta clase representa el panel para gestionar las especificaciones.
@@ -32,8 +30,7 @@ public class EspecificacionPanel extends JPanel {
     private final AtributoController atributoController;
     private int idEspecificacionSeleccionada = -1; // Para almacenar el ID de la especificación seleccionada
     private final JButton saveButton;
-    private final Map<Integer, String> atributosOriginales = new HashMap<>();
-    private final List<Object[]> atributosTemporales = new ArrayList<>(); // Lista para almacenar cambios temporales
+    private final List<Object[]> atributosTemporales = new ArrayList<>(); // Lista para almacenar cambios temporales, con un estado adicional para la acción
 
     public EspecificacionPanel() {
         especificacionController = new EspecificacionController();
@@ -147,7 +144,29 @@ public class EspecificacionPanel extends JPanel {
             }
         });
 
-        atributoTableModel.addTableModelListener(e -> saveButton.setEnabled(true));
+        // Agregar un TableModelListener para actualizar atributosTemporales cuando se modifiquen los valores en la tabla
+        atributoTableModel.addTableModelListener(e -> {
+            int row = e.getFirstRow();
+            int column = e.getColumn();
+            if (row >= 0 && column >= 0) {
+                Object nuevoValor = atributoTableModel.getValueAt(row, column);
+                atributosTemporales.get(row)[column] = nuevoValor;
+                int estadoActual = (int) atributosTemporales.get(row)[4];
+                // Marcar el atributo como modificado si no está en estado eliminado
+                if ((int) atributosTemporales.get(row)[4] != 3) {
+                    if (estadoActual == 1) {
+                        // Si el estado es 1 (Agregado), no cambiar el estado
+                        atributosTemporales.get(row)[4] = 1;
+                    } else if (column == 0) { // Si se modifica el nombre del atributo
+                        atributosTemporales.get(row)[4] = 4; // Estado 4: Nombre modificado
+                    } else {
+                        atributosTemporales.get(row)[4] = 2; // Estado 2: Modificado
+                    }
+                }
+                saveButton.setEnabled(true); // Habilitar el botón de guardar
+            }
+        });
+
     }
 
     private void cargarEspecificaciones() {
@@ -172,8 +191,9 @@ public class EspecificacionPanel extends JPanel {
             atributosTemporales.clear(); // Limpiar la lista temporal antes de cargar los nuevos datos
 
             for (Object[] atributo : atributos) {
-                atributoTableModel.addRow(atributo);
-                atributosTemporales.add(atributo.clone());  // Guardar una copia en la lista temporal
+                Object[] atributoConEstado = {atributo[0], atributo[1], atributo[2], atributo[3], 0, atributo[0]}; // Estado 0: Sin cambios
+                atributoTableModel.addRow(atributo); // Cargar el atributo en la tabla
+                atributosTemporales.add(atributoConEstado);  // Cargar el atributo en la lista temporal
             }
         }
         saveButton.setEnabled(false);
@@ -206,9 +226,9 @@ public class EspecificacionPanel extends JPanel {
     private class AddAtributoListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            Object[] nuevoAtributo = {"", "", "", ""};
-            atributoTableModel.addRow(nuevoAtributo);  // Añadir el nuevo atributo temporalmente
-            atributosTemporales.add(nuevoAtributo); // Añadirlo a la lista temporal
+            Object[] nuevoAtributo = {"", "", "", "", 1, ""}; // Estado 1: Agregado
+            atributoTableModel.addRow(nuevoAtributo);
+            atributosTemporales.add(nuevoAtributo);
             saveButton.setEnabled(true); // Habilitar el botón de guardar
         }
     }
@@ -219,8 +239,8 @@ public class EspecificacionPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             int selectedRow = atributoTable.getSelectedRow();
             if (selectedRow >= 0) {
-                atributoTableModel.removeRow(selectedRow);
-                atributosTemporales.remove(selectedRow); // Eliminar también de la lista temporal
+                atributosTemporales.get(selectedRow)[4] = 3; // Estado 3: Eliminado
+                atributoTableModel.removeRow(selectedRow); // Eliminar visualmente pero no de atributosTemporales
                 saveButton.setEnabled(true); // Habilitar el botón de guardar
             } else {
                 JOptionPane.showMessageDialog(null, "Seleccione un atributo para eliminar.");
@@ -257,7 +277,6 @@ public class EspecificacionPanel extends JPanel {
     private class SaveAtributosListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            // Forzar que la tabla deje de estar en modo de edición antes de guardar
             if (atributoTable.isEditing()) {
                 TableCellEditor editor = atributoTable.getCellEditor();
                 if (editor != null) {
@@ -266,41 +285,73 @@ public class EspecificacionPanel extends JPanel {
             }
 
             boolean success = true;
-            for (int i = 0; i < atributoTableModel.getRowCount(); i++) {
-                String atributoSeleccionado = (String) atributoTableModel.getValueAt(i, 0);
 
-                // Obtener los valores mínimos y máximos
-                Object valorMinObj = atributoTableModel.getValueAt(i, 1);
-                Object valorMaxObj = atributoTableModel.getValueAt(i, 2);
-                String unidadMedida = (String) atributoTableModel.getValueAt(i, 3);
+            for (Object[] atributo : atributosTemporales) {
+                int estado = (int) atributo[4]; // Obtener el estado del atributo
+                String atributoSeleccionado = (String) atributo[0];
+                Object valorMinObj = atributo[1];
+                Object valorMaxObj = atributo[2];
+                String unidadMedida = (String) atributo[3];
 
-                // Verificar que no estén vacíos
-                if (atributoSeleccionado.isEmpty() || valorMinObj == null || valorMaxObj == null || unidadMedida.isEmpty()) {
+                // Verificar que no estén vacíos (excepto los eliminados)
+                if (estado != 3 && (atributoSeleccionado == null || atributoSeleccionado.isEmpty() ||
+                        valorMinObj == null || valorMaxObj == null ||
+                        unidadMedida == null || unidadMedida.isEmpty())) {
                     JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos del atributo.");
                     return;
                 }
 
-                double valorMin, valorMax;
-
                 try {
-                    valorMin = Double.parseDouble(valorMinObj.toString());
-                    valorMax = Double.parseDouble(valorMaxObj.toString());
+                    double valorMin = Double.parseDouble(valorMinObj.toString());
+                    double valorMax = Double.parseDouble(valorMaxObj.toString());
+
+                    int idAtributo = atributoController.obtenerIdAtributo(atributoSeleccionado);
+
+                    // Ejecutar acción según el estado
+                    switch (estado) {
+                        case 1: // Agregar
+                            success &= especificacionController.agregarAtributoAEspecificacion(idEspecificacionSeleccionada, idAtributo, valorMin, valorMax, unidadMedida);
+                            break;
+                        case 2: // Modificar
+                            success &= especificacionController.modificarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributo, valorMin, valorMax, unidadMedida);
+                            break;
+                        case 3: // Eliminar
+                            try {
+                                success &= especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributo);
+                            } catch (EspecificacionController.AtributoConCalificacionesException ex) {
+                                JOptionPane.showMessageDialog(null, ex.getMessage());
+                                return;
+                            }
+                            break;
+                        case 4: // Nombre modificado
+                            // Eliminar el atributo original
+                            String nombreOriginal = (String) atributo[5];
+                            int idAtributoOriginal = atributoController.obtenerIdAtributo(nombreOriginal);
+                            try {
+                                success &= especificacionController.eliminarAtributoDeEspecificacion(idEspecificacionSeleccionada, idAtributoOriginal);
+                                if (success) {
+                                    // Agregar el nuevo atributo
+                                    success = especificacionController.agregarAtributoAEspecificacion(idEspecificacionSeleccionada, idAtributo, valorMin, valorMax, unidadMedida);
+                                }
+                            } catch (EspecificacionController.AtributoConCalificacionesException ex) {
+                                JOptionPane.showMessageDialog(null, ex.getMessage());
+                                return;
+                            }
+                            break;
+                    }
+
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Error en los valores numéricos. Por favor ingrese valores válidos.");
                     return;
                 }
-
-                int idAtributo = atributoController.obtenerIdAtributo(atributoSeleccionado);
-                success &= especificacionController.agregarAtributoAEspecificacion(idEspecificacionSeleccionada, idAtributo, valorMin, valorMax, unidadMedida);
             }
 
             if (success) {
-                JOptionPane.showMessageDialog(null, "Todos los atributos guardados exitosamente");
-                cargarAtributosDeEspecificacion();  // Recargar los atributos después de guardar
+                JOptionPane.showMessageDialog(null, "Todos los cambios guardados exitosamente");
+                cargarAtributosDeEspecificacion(); // Recargar los atributos después de guardar
             } else {
-                JOptionPane.showMessageDialog(null, "Error al guardar los atributos");
+                JOptionPane.showMessageDialog(null, "Error al guardar los cambios");
             }
         }
     }
-
 }

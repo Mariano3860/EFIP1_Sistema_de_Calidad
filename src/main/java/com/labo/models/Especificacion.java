@@ -43,12 +43,12 @@ public class Especificacion {
         return atributos;
     }
 
-    // Mét.odo para agregar un atributo
+    // Método para agregar un atributo
     public void agregarAtributo(Atributo atributo) {
         this.atributos.add(atributo);
     }
 
-    // Mét.odo para agregar una lista de atributos
+    // Método para agregar una lista de atributos
     public void agregarAtributos(List<Atributo> atributos) {
         this.atributos.addAll(atributos);
     }

@@ -1,7 +1,6 @@
 package com.labo.controllers;
 
 import com.labo.dao.DatabaseConnection;
-import com.labo.models.Atributo;
 import com.labo.models.Especificacion;
 
 import java.sql.Connection;
@@ -20,7 +19,7 @@ public class EspecificacionController {
     private static final Logger logger = Logger.getLogger(EspecificacionController.class.getName());
 
     /**
-     * Mét.odo para obtener todas las especificaciones sin repetir por atributos.
+     * Método para obtener todas las especificaciones sin repetir por atributos.
      *
      * @return Lista de especificaciones.
      */
@@ -51,7 +50,7 @@ public class EspecificacionController {
     }
 
     /**
-     * Mét.odo para registrar una nueva especificación en la base de datos.
+     * Método para registrar una nueva especificación en la base de datos.
      *
      * @param nombre    Nombre de la especificación.
      * @param idArticulo ID del artículo relacionado.
@@ -75,7 +74,7 @@ public class EspecificacionController {
     }
 
     /**
-     * Mét.odo para obtener los atributos asociados a una especificación por su ID.
+     * Método para obtener los atributos asociados a una especificación por su ID.
      *
      * @param idEspecificacion El ID de la especificación.
      * @return Lista de objetos con los atributos de la especificación.
@@ -111,7 +110,7 @@ public class EspecificacionController {
     }
 
     /**
-     * Mét.odo para agregar un atributo a una especificación ya existente.
+     * Método para agregar un atributo a una especificación ya existente.
      *
      * @param idEspecificacion  ID de la especificación.
      * @param idAtributo        ID del atributo.
@@ -143,48 +142,29 @@ public class EspecificacionController {
         }
     }
 
-    /**
-     * Mét.odo para agregar varios atributos a una especificación existente.
-     *
-     * @param idEspecificacion  ID de la especificación.
-     * @param atributos         Lista de atributos.
-     * @return True si todos los atributos se agregaron correctamente, False si hubo algún error.
-     */
-    public boolean agregarAtributosAEspecificacion(int idEspecificacion, List<Atributo> atributos) {
-        boolean success = true;
-        for (Atributo atributo : atributos) {
-            boolean result = agregarAtributoAEspecificacion(
-                    idEspecificacion,
-                    atributo.getIdAtributo(),
-                    atributo.getValorMin(),
-                    atributo.getValorMax(),
-                    atributo.getUnidadMedida()
-            );
-            if (!result) {
-                success = false;  // Si uno falla, marcamos el proceso como fallido
-            }
+    // Clase de excepción personalizada
+    public static class AtributoConCalificacionesException extends Exception {
+        public AtributoConCalificacionesException(String message) {
+            super(message);
         }
-        return success;
     }
 
     /**
-     * Mét.odo para eliminar un atributo a una especificación existente.
+     * Método para eliminar un atributo a una especificación existente.
      *
      * @param idEspecificacion  ID de la especificación.
      * @param idAtributo         id de atributo.
      * @return True si el atributo se eliminó correctamente, False si hubo algún error.
      */
-    public boolean eliminarAtributoDeEspecificacion(int idEspecificacion, int idAtributo) {
+    public boolean eliminarAtributoDeEspecificacion(int idEspecificacion, int idAtributo) throws AtributoConCalificacionesException {
         String deleteQuery = "DELETE FROM EspecificacionAtributo WHERE idEspecificacion = ? AND idAtributo = ?";
 
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(deleteQuery)) {
 
-            // Configurar los parámetros de la consulta
             statement.setInt(1, idEspecificacion);
             statement.setInt(2, idAtributo);
 
-            // Ejecutar la consulta y verificar si se eliminó al menos una fila
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
                 return true;
@@ -194,13 +174,16 @@ public class EspecificacionController {
             }
 
         } catch (SQLException e) {
+            if (e.getSQLState().equals("23000")) { // Código de estado SQL para violación de restricción de clave foránea
+                throw new AtributoConCalificacionesException("No se puede eliminar el atributo porque tiene calificaciones asociadas.");
+            }
             Logger.getLogger(EspecificacionController.class.getName()).log(Level.SEVERE, "Error al eliminar el atributo de la especificación", e);
             return false;
         }
     }
 
     /**
-     * Mét.odo para eliminar una especificacion existente.
+     * Método para eliminar una especificacion existente.
      *
      * @param idEspecificacion  ID de la especificación.
      * @return True si la especificacion se eliminó correctamente, False si hubo algún error.
@@ -240,6 +223,39 @@ public class EspecificacionController {
 
         } catch (SQLException e) {
             Logger.getLogger(EspecificacionController.class.getName()).log(Level.SEVERE, "Error en la conexión al eliminar la especificación", e);
+            return false;
+        }
+    }
+
+    /**
+     * Método para modificar un atributo en una especificación existente.
+     *
+     * @param idEspecificacion  ID de la especificación.
+     * @param idAtributo        ID del atributo.
+     * @param valorMin          Valor mínimo.
+     * @param valorMax          Valor máximo.
+     * @param unidadMedida      Unidad de medida.
+     * @return True si el atributo se actualizó correctamente, False si hubo un error.
+     */
+// Método para modificar un atributo en una especificación existente
+    public boolean modificarAtributoDeEspecificacion(int idEspecificacion, int idAtributo, double valorMin, double valorMax, String unidadMedida) {
+        String updateQuery = "UPDATE EspecificacionAtributo SET valorMin = ?, valorMax = ?, unidadMedida = ? " +
+                "WHERE idEspecificacion = ? AND idAtributo = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+
+            statement.setDouble(1, valorMin);
+            statement.setDouble(2, valorMax);
+            statement.setString(3, unidadMedida);
+            statement.setInt(4, idEspecificacion);
+            statement.setInt(5, idAtributo);
+
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            Logger.getLogger(EspecificacionController.class.getName()).log(Level.SEVERE, "Error al modificar el atributo en la especificación", e);
             return false;
         }
     }

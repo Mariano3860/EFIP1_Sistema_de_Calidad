@@ -19,7 +19,7 @@ public class ArticuloController {
     private static final Logger logger = Logger.getLogger(ArticuloController.class.getName());
 
     /**
-     * Mét.odo para obtener la lista de nombres de los artículos.
+     * Método para obtener la lista de nombres de los artículos.
      *
      * @return Lista de nombres de artículos.
      */
@@ -42,7 +42,7 @@ public class ArticuloController {
     }
 
     /**
-     * Mét.odo para obtener el ID de un artículo dado su nombre.
+     * Método para obtener el ID de un artículo dado su nombre.
      *
      * @param nombreArticulo El nombre del artículo.
      * @return El ID del artículo.
