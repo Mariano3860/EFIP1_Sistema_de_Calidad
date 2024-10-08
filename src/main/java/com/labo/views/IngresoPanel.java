@@ -41,6 +41,7 @@ public class IngresoPanel extends JPanel {
         String[] columnNames = {"ID Ingreso", "Proveedor", "Tipo", "Fecha", "Artículo", "Usuario"};
         tableModel = new DefaultTableModel(columnNames, 0);
         loteTable = new JTable(tableModel);
+        loteTable.setPreferredScrollableViewportSize(new Dimension(400, 300));
 
         // Habilitar la ordenación por columnas
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
@@ -70,16 +71,14 @@ public class IngresoPanel extends JPanel {
 
         // Panel de entrada de datos
         JPanel inputPanel = new JPanel(new GridLayout(5, 2));
-
         // Crear campos de entrada
         loteInputProveedor = new JTextField();
         loteInputTipo = new JTextField();
         loteInputFecha = new JTextField(LocalDate.now().toString()); // Inicializa la fecha con la fecha actual
-
         // Obtener los nombres de los artículos desde el controlador
         List<String> articulos = articuloController.obtenerArticulos().stream().map(Articulo::getNombre).toList();
         loteInputArticulo = new JComboBox<>(articulos.toArray(new String[0]));
-
+        // Formulario del inputPanel
         inputPanel.add(new JLabel("Proveedor:"));
         inputPanel.add(loteInputProveedor);
         inputPanel.add(new JLabel("Tipo de Lote:"));
@@ -89,15 +88,19 @@ public class IngresoPanel extends JPanel {
         inputPanel.add(new JLabel("Artículo:"));
         inputPanel.add(loteInputArticulo);
 
-        // Añadir el panel de formulario de ingreso al sur
-        add(inputPanel, BorderLayout.SOUTH);
-
         // Botón de guardar especificación
         JButton saveButton = new JButton("Guardar Ingreso");
         saveButton.addActionListener(new SaveIngresoListener());
         JPanel saveButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         saveButtonPanel.add(saveButton);
-        add(saveButtonPanel, BorderLayout.SOUTH);
+
+        // Crear un panel combinado para inputPanel y saveButtonPanel
+        JPanel combinedPanel = new JPanel(new BorderLayout());
+        combinedPanel.add(inputPanel, BorderLayout.CENTER);
+        combinedPanel.add(saveButtonPanel, BorderLayout.SOUTH);
+
+        // Añadir el panel combinado al sur
+        add(combinedPanel, BorderLayout.AFTER_LAST_LINE);
 
         cargarIngresos();
     }
