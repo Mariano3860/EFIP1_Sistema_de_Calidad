@@ -41,7 +41,7 @@ public class IngresoPanel extends JPanel {
         String[] columnNames = {"ID Ingreso", "Proveedor", "Tipo", "Fecha", "Artículo", "Usuario"};
         tableModel = new DefaultTableModel(columnNames, 0);
         loteTable = new JTable(tableModel);
-        loteTable.setPreferredScrollableViewportSize(new Dimension(400, 300));
+        loteTable.setPreferredScrollableViewportSize(new Dimension(400, 270));
 
         // Habilitar la ordenación por columnas
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
@@ -66,11 +66,14 @@ public class IngresoPanel extends JPanel {
         buttonPanel.add(modifyIngresoButton);
         buttonPanel.add(newIngresoButton);
 
+        // Añadir una línea debajo de los botones
+        buttonPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.GRAY));
+
         // Añadir el panel de botones al centro
         add(buttonPanel, BorderLayout.CENTER);
 
         // Panel de entrada de datos
-        JPanel inputPanel = new JPanel(new GridLayout(5, 2));
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2,5,5));
         // Crear campos de entrada
         loteInputProveedor = new JTextField();
         loteInputTipo = new JTextField();
@@ -101,6 +104,9 @@ public class IngresoPanel extends JPanel {
 
         // Añadir el panel combinado al sur
         add(combinedPanel, BorderLayout.AFTER_LAST_LINE);
+
+        // Añadir un gap entre los botones y el formulario
+        combinedPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));  // Agregar un gap de 10px arriba de la seccion final
 
         cargarIngresos();
     }
