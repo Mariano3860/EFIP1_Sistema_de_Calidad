@@ -24,8 +24,8 @@ EFIP1_Sistema_de_Calidad/
 │   ├── com/
 │   │   ├── labo/            # Paquete principal
 │   │   ├── controllers/     # Controladores para la lógica de negocio
-│   │   ├── dao/        # Conexiones a la base de datos
-│   │   ├── views/          # Interfaces gráficas
+│   │   ├── dao/             # Conexiones a la base de datos
+│   │   ├── views/           # Interfaces gráficas
 │   │   └── models/          # Entidades y modelos de datos
 ├── resources/               # Recursos como imágenes o archivos de configuración
 ├── Database/                # Scripts de creación de tablas de la base de datos (labo.sql)
