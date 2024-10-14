@@ -62,7 +62,7 @@ La forma de configurar la codificación de archivos a UTF-8 puede variar dependi
      ```
 
    - Asegurarse de que los detalles de la conexión a la base de datos (usuario, contraseña, URL) estén correctamente configurados en `DatabaseConnection.java`:
-     ```java
+     ```
      private static final String URL = "jdbc:mysql://localhost/labo?serverTimezone=UTC";
      private static final String USER = "root";
      private static final String PASSWORD = "tu_password";
@@ -77,9 +77,10 @@ La forma de configurar la codificación de archivos a UTF-8 puede variar dependi
 4. **Ejecutar el Proyecto**:
    - Una vez compilado, puedes ejecutar la aplicación ejecutando el archivo `Main.java`:
      ```bash
-     java -cp target/classes:libs/* com.labo.Main
-     ```
-
+      java -Dfile.encoding=UTF-8 -cp target/classes:libs/* com.labo.Main
+      ```
+      El projecto se ejecutará con la codificación de caracteres `UTF-8`
+   
 ## Usuario por Defecto
 
 - Usuario: `admin`
