@@ -19,13 +19,13 @@ public class UsuarioController {
     private static Usuario usuarioAutenticado;
 
     // Método para autenticar y almacenar el usuario autenticado
-    public boolean autenticar(String nombre, String contrasena) {
-        String query = "SELECT idUsuario, nombre FROM Usuario WHERE nombre = ? AND contraseña = ?";
+    public boolean autenticar(String nombre, String pass) {
+        String query = "SELECT idUsuario, nombre FROM Usuario WHERE nombre = ? AND pass = ?";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, nombre);
-            statement.setString(2, contrasena);
+            statement.setString(2, pass);
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {

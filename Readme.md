@@ -39,6 +39,15 @@ EFIP1_Sistema_de_Calidad/
 - **MySQL** como base de datos.
 - **JDBC MySQL Connector** (automáticamente gestionado por Maven).
 
+## Codificación de Archivos
+
+Este proyecto utiliza caracteres especiales como la ñ y los tildes. Para asegurar el correcto funcionamiento de estos caracteres, es necesario que los archivos del proyecto estén codificados en UTF-8.
+La forma de configurar la codificación de archivos a UTF-8 puede variar dependiendo del IDE que estés utilizando. A continuación, se proporcionan instrucciones generales que pueden aplicarse a la mayoría de los IDEs:
+1. Busca en la configuración de tu IDE la opción para cambiar la codificación de archivos. Esto puede estar en un menú como `File > Settings`, `Preferences`, `Options`, o similar.
+2. Dentro de la configuración, busca una opción llamada "File Encodings", "Character Set", "Text File Encoding", o similar.
+3. Cambia la codificación global y del proyecto (si está disponible) a `UTF-8`.
+4. Guarda los cambios.
+
 ## Configuración del Proyecto
 
 1. **Clonar el repositorio**:
