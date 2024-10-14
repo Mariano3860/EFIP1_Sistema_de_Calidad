@@ -1,6 +1,5 @@
 package com.labo.controllers;
 
-import com.labo.dao.DatabaseConnection;
 import com.labo.models.Articulo;
 
 import java.sql.Connection;
@@ -15,7 +14,7 @@ import java.util.logging.Logger;
 /**
  * Controlador para manejar las operaciones relacionadas con Artículos.
  */
-public class ArticuloController {
+public class ArticuloController extends BaseController{
     private static final Logger logger = Logger.getLogger(ArticuloController.class.getName());
 
     /**
@@ -27,7 +26,7 @@ public class ArticuloController {
         List<String> nombresArticulos = new ArrayList<>();
         String query = "SELECT nombre FROM Articulo";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -49,7 +48,7 @@ public class ArticuloController {
      */
     public int obtenerIdArticulo(String nombreArticulo) {
         String query = "SELECT idArticulo FROM Articulo WHERE nombre = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, nombreArticulo);
@@ -68,7 +67,7 @@ public class ArticuloController {
         List<Articulo> articulos = new ArrayList<>();
         String query = "SELECT idArticulo, nombre FROM Articulo";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 

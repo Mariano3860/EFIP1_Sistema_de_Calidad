@@ -1,6 +1,5 @@
 package com.labo.controllers;
 
-import com.labo.dao.DatabaseConnection;
 import com.labo.models.Usuario;
 
 import java.sql.Connection;
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class UsuarioController {
+public class UsuarioController extends BaseController{
     private static final Logger logger = Logger.getLogger(UsuarioController.class.getName());
 
     // Campo para almacenar el usuario autenticado
@@ -21,7 +20,7 @@ public class UsuarioController {
     // Método para autenticar y almacenar el usuario autenticado
     public boolean autenticar(String nombre, String pass) {
         String query = "SELECT idUsuario, nombre FROM Usuario WHERE nombre = ? AND pass = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, nombre);
@@ -49,7 +48,7 @@ public class UsuarioController {
         List<Usuario> usuarios = new ArrayList<>();
         String query = "SELECT idUsuario, nombre FROM Usuario";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 

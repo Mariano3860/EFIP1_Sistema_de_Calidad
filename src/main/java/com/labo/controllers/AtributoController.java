@@ -1,6 +1,5 @@
 package com.labo.controllers;
 
-import com.labo.dao.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * Controlador para manejar las operaciones relacionadas con Atributos.
  */
-public class AtributoController {
+public class AtributoController extends BaseController{
     private static final Logger logger = Logger.getLogger(AtributoController.class.getName());
 
     /**
@@ -26,7 +25,7 @@ public class AtributoController {
         List<String> nombresAtributos = new ArrayList<>();
         String query = "SELECT nombre FROM Atributo";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -48,7 +47,7 @@ public class AtributoController {
      */
     public int obtenerIdAtributo(String nombreAtributo) {
         String query = "SELECT idAtributo FROM Atributo WHERE nombre = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, nombreAtributo);

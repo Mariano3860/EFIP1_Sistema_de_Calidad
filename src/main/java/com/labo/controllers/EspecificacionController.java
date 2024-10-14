@@ -1,6 +1,5 @@
 package com.labo.controllers;
 
-import com.labo.dao.DatabaseConnection;
 import com.labo.models.Especificacion;
 
 import java.sql.Connection;
@@ -15,7 +14,7 @@ import java.util.logging.Logger;
 /**
  * Controlador para manejar las operaciones relacionadas con Especificaciones.
  */
-public class EspecificacionController {
+public class EspecificacionController extends BaseController{
     private static final Logger logger = Logger.getLogger(EspecificacionController.class.getName());
 
     // Clase de excepción personalizada
@@ -44,7 +43,7 @@ public class EspecificacionController {
                 "FROM Especificacion " +
                 "JOIN Articulo ON Especificacion.idArticulo = Articulo.idArticulo";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -73,7 +72,7 @@ public class EspecificacionController {
     public boolean registrarEspecificacion(String nombre, int idArticulo) {
         String query = "INSERT INTO Especificacion (nombre, idArticulo) VALUES (?, ?)";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, nombre);
@@ -101,7 +100,7 @@ public class EspecificacionController {
                 "JOIN Atributo ON EspecificacionAtributo.idAtributo = Atributo.idAtributo " +
                 "WHERE EspecificacionAtributo.idEspecificacion = ?";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, idEspecificacion);
@@ -138,7 +137,7 @@ public class EspecificacionController {
                 "VALUES (?, ?, ?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE valorMin = VALUES(valorMin), valorMax = VALUES(valorMax), unidadMedida = VALUES(unidadMedida)";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(upsertQuery)) {
 
             statement.setInt(1, idEspecificacion);
@@ -166,7 +165,7 @@ public class EspecificacionController {
     public boolean eliminarAtributoDeEspecificacion(int idEspecificacion, int idAtributo) throws AtributoConCalificacionesException {
         String deleteQuery = "DELETE FROM EspecificacionAtributo WHERE idEspecificacion = ? AND idAtributo = ?";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(deleteQuery)) {
 
             statement.setInt(1, idEspecificacion);
@@ -199,7 +198,7 @@ public class EspecificacionController {
         String deleteAtributosQuery = "DELETE FROM EspecificacionAtributo WHERE idEspecificacion = ?";
         String deleteEspecificacionQuery = "DELETE FROM Especificacion WHERE idEspecificacion = ?";
 
-        try (Connection connection = DatabaseConnection.getConnection()) {
+        try (Connection connection = getConnection()) {
             connection.setAutoCommit(false); // Deshabilitar el autocommit para manejar transacciones
 
             try (PreparedStatement deleteAtributosStmt = connection.prepareStatement(deleteAtributosQuery);
@@ -251,7 +250,7 @@ public class EspecificacionController {
         String updateQuery = "UPDATE EspecificacionAtributo SET valorMin = ?, valorMax = ?, unidadMedida = ? " +
                 "WHERE idEspecificacion = ? AND idAtributo = ?";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(updateQuery)) {
 
             statement.setDouble(1, valorMin);

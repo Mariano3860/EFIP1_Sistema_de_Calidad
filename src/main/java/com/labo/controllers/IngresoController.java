@@ -1,6 +1,5 @@
 package com.labo.controllers;
 
-import com.labo.dao.DatabaseConnection;
 import com.labo.models.Ingreso;
 
 import java.sql.Connection;
@@ -13,7 +12,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-public class IngresoController {
+public class IngresoController extends BaseController{
     private static final Logger logger = Logger.getLogger(IngresoController.class.getName());
 
     // Clase de excepción personalizada
@@ -27,7 +26,7 @@ public class IngresoController {
     public boolean registrarIngreso(String proveedor, String tipo, Date fecha, int idArticulo, int idUsuario) {
         String query = "INSERT INTO Ingreso(proveedor, tipo, fecha, idArticulo, idUsuario) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, proveedor);
@@ -50,7 +49,7 @@ public class IngresoController {
         String query = "SELECT idIngreso, proveedor, tipo, fecha, idArticulo, idUsuario FROM Ingreso";
         List<Ingreso> ingresos = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -82,7 +81,7 @@ public class IngresoController {
                 "JOIN Usuario ON Ingreso.idUsuario = Usuario.idUsuario";
         List<Ingreso> ingresos = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -112,7 +111,7 @@ public class IngresoController {
     public boolean eliminarIngreso(int idIngreso) throws IngresoConCalificacionesException {
         String deleteQuery = "DELETE FROM ingreso WHERE idIngreso = ?";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(deleteQuery)) {
 
             statement.setInt(1, idIngreso);
@@ -133,7 +132,7 @@ public class IngresoController {
     public boolean modificarIngreso(int idIngreso, String proveedor, String tipo, Date fecha, int idArticulo) {
         String query = "UPDATE Ingreso SET proveedor = ?, tipo = ?, fecha = ?, idArticulo = ? WHERE idIngreso = ?";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, proveedor);
@@ -154,7 +153,7 @@ public class IngresoController {
     // Métodos auxiliares para convertir IDs a nombres
     public String obtenerNombreArticuloPorId(int idArticulo) {
         String query = "SELECT nombre FROM Articulo WHERE idArticulo = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, idArticulo);
@@ -171,7 +170,7 @@ public class IngresoController {
 
     public String obtenerNombreUsuarioPorId(int idUsuario) {
         String query = "SELECT nombre FROM Usuario WHERE idUsuario = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, idUsuario);
