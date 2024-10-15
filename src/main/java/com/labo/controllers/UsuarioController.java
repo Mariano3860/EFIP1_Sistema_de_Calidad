@@ -6,8 +6,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,7 +17,7 @@ public class UsuarioController extends BaseController{
 
     // Método para autenticar y almacenar el usuario autenticado
     public boolean autenticar(String nombre, String pass) {
-        String query = "SELECT idUsuario, nombre FROM Usuario WHERE nombre = ? AND pass = ?";
+        String query = "SELECT idUsuario, nombre, email FROM Usuario WHERE nombre = ? AND pass = ?";
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
@@ -29,7 +27,7 @@ public class UsuarioController extends BaseController{
 
             if (resultSet.next()) {
                 // Si la autenticación es exitosa, se almacena el usuario autenticado
-                usuarioAutenticado = new Usuario(resultSet.getInt("idUsuario"), resultSet.getString("nombre"));
+                usuarioAutenticado = new Usuario(resultSet.getInt("idUsuario"), resultSet.getString("nombre"), resultSet.getString("email"), pass);
                 return true;
             }
         } catch (SQLException e) {
@@ -43,26 +41,4 @@ public class UsuarioController extends BaseController{
         return usuarioAutenticado;
     }
 
-    // Método para obtener la lista de usuarios desde la base de datos
-    public List<Usuario> obtenerUsuarios() {
-        List<Usuario> usuarios = new ArrayList<>();
-        String query = "SELECT idUsuario, nombre FROM Usuario";
-
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
-
-            while (resultSet.next()) {
-                Usuario usuario = new Usuario(
-                        resultSet.getInt("idUsuario"),
-                        resultSet.getString("nombre")
-                );
-                usuarios.add(usuario);
-            }
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error al obtener usuarios", e);
-        }
-
-        return usuarios;
-    }
 }
