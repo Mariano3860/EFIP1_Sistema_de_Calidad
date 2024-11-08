@@ -1,9 +1,12 @@
 package com.labo.views;
 
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.labo.controllers.CalificacionLoteController;
 import com.labo.controllers.EspecificacionController;
 import com.labo.models.CalificacionLote;
 import com.labo.models.DetalleCalificacionLote;
+import com.itextpdf.text.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -13,6 +16,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +33,7 @@ public class CalificacionLotePanel extends JPanel {
     private final JButton crearCalificacionBtn;
     private final JButton guardarCalificacionBtn;
     private final JButton eliminarCalificacionBtn;
-
+    private final JButton crearInformeBtn;
     public CalificacionLotePanel() {
         controller = new CalificacionLoteController();
         setLayout(new BorderLayout());
@@ -105,10 +110,13 @@ public class CalificacionLotePanel extends JPanel {
         crearCalificacionBtn = new JButton("Crear Calificación");
         crearCalificacionBtn.addActionListener(this::crearCalificacion);
 
-
         // Botón Eliminar Calificación
         eliminarCalificacionBtn = new JButton("Eliminar Calificación");
         eliminarCalificacionBtn.addActionListener(this::eliminarCalificacion);
+
+        // Botón Informe de Calificación
+        crearInformeBtn = new JButton("Crear Informe");
+        crearInformeBtn.addActionListener(this::crearInforme);
 
         // Panel combinado para el formulario y el botón de creación
         JPanel combinedPanel = new JPanel(new BorderLayout());
@@ -117,6 +125,7 @@ public class CalificacionLotePanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(crearCalificacionBtn);
         buttonPanel.add(eliminarCalificacionBtn);
+        buttonPanel.add(crearInformeBtn);
         combinedPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(combinedPanel, BorderLayout.SOUTH);
@@ -283,6 +292,73 @@ public class CalificacionLotePanel extends JPanel {
             }
         } else {
             return 0.0;
+        }
+    }
+
+    private void crearInforme(ActionEvent e) {
+        int selectedRow = tablaResumen.getSelectedRow();
+        if (selectedRow != -1) {
+            int idIngreso = (int) modeloResumen.getValueAt(selectedRow, 0);
+            int numMuestra = (int) modeloResumen.getValueAt(selectedRow, 1);
+            String nombreArticulo = (String) modeloResumen.getValueAt(selectedRow, 2);
+            String estado = (String) modeloResumen.getValueAt(selectedRow, 3);
+            java.util.Date fecha = (java.util.Date) modeloResumen.getValueAt(selectedRow, 4);
+
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Guardar Informe");
+            fileChooser.setSelectedFile(new File("Informe_CalificacionLote.pdf"));
+            int userSelection = fileChooser.showSaveDialog(this);
+
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = fileChooser.getSelectedFile();
+                generarPDF(fileToSave, idIngreso, numMuestra, nombreArticulo, estado, fecha);
+                JOptionPane.showMessageDialog(this, "Informe guardado en: " + fileToSave.getAbsolutePath());
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleccione una calificación para crear el informe.");
+        }
+    }
+
+    private void generarPDF(File file, int idIngreso, int numMuestra, String nombreArticulo, String estado, java.util.Date fecha) {
+        try {
+            Document document = new Document();
+            PdfWriter.getInstance(document, new FileOutputStream(file));
+            document.open();
+
+            document.add(new Paragraph("Informe de Calificación de Lote", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16)));
+            document.add(new Paragraph(" "));
+
+            document.add(new Paragraph("ID Ingreso: " + idIngreso));
+            document.add(new Paragraph("Número de Muestra: " + numMuestra));
+            document.add(new Paragraph("Artículo: " + nombreArticulo));
+            document.add(new Paragraph("Estado: " + estado));
+            document.add(new Paragraph("Fecha: " + fecha.toString()));
+            document.add(new Paragraph(" "));
+
+            document.add(new Paragraph("Detalles de Atributos", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+            document.add(new Paragraph(" "));
+
+            PdfPTable table = new PdfPTable(5);
+            table.addCell("Atributo");
+            table.addCell("Valor Min");
+            table.addCell("Valor Max");
+            table.addCell("Unidad");
+            table.addCell("Valor");
+
+            List<DetalleCalificacionLote> detalles = controller.obtenerDetallesCalificacion(idIngreso, numMuestra);
+            for (DetalleCalificacionLote detalle : detalles) {
+                table.addCell(detalle.getNombreAtributo());
+                table.addCell(String.valueOf(detalle.getValorMin()));
+                table.addCell(String.valueOf(detalle.getValorMax()));
+                table.addCell(detalle.getUnidadMedida());
+                table.addCell(String.valueOf(detalle.getValor()));
+            }
+
+            document.add(table);
+            document.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al generar el informe.");
         }
     }
 
