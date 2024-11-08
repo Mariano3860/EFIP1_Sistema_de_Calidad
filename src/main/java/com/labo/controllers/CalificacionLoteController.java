@@ -307,15 +307,29 @@ public class CalificacionLoteController extends BaseController {
         return lotes;
     }
 
+    public int obtenerIdArticuloDesdeLote(int idLote) {
+        String query = "SELECT idArticulo FROM ingreso WHERE idIngreso = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, idLote);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt("idArticulo"); // Devuelve el ID del artículo
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // Retorna -1 si no se encuentra el artículo
+    }
+
     public List<String> obtenerEspecificacionesPorArticulo(int idArticulo) {
         List<String> especificaciones = new ArrayList<>();
         String query = "SELECT nombre FROM especificacion WHERE idArticulo = ?";
-
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, idArticulo);
             ResultSet resultSet = statement.executeQuery();
-
             while (resultSet.next()) {
                 especificaciones.add(resultSet.getString("nombre"));
             }

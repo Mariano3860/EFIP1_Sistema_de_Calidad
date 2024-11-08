@@ -190,13 +190,32 @@ public class CalificacionLotePanel extends JPanel {
     private void cargarEspecificaciones() {
         especificacionDropdown.removeAllItems();
         String loteSeleccionado = (String) loteDropdown.getSelectedItem();
+
         if (loteSeleccionado != null) {
-            int idArticulo = obtenerIdArticuloDeLote(loteSeleccionado);
-            List<String> especificaciones = controller.obtenerEspecificacionesPorArticulo(idArticulo);
-            for (String especificacion : especificaciones) {
-                especificacionDropdown.addItem(especificacion);
+            // Obtener el ID de lote desde el valor de `loteSeleccionado`
+            int idLote = obtenerIdLoteDesdeDescripcion(loteSeleccionado); // Nuevo método para extraer el ID de lote
+            int idArticulo = controller.obtenerIdArticuloDesdeLote(idLote); // Obtenemos el ID de artículo desde el ID de lote
+
+            if (idArticulo != -1) {
+                List<String> especificaciones = controller.obtenerEspecificacionesPorArticulo(idArticulo);
+
+                if (especificaciones.isEmpty()) {
+                    System.out.println("No se encontraron especificaciones para el artículo con ID: " + idArticulo);
+                }
+
+                for (String especificacion : especificaciones) {
+                    especificacionDropdown.addItem(especificacion);
+                }
+            } else {
+                System.out.println("No se encontró el artículo para el lote con ID: " + idLote);
             }
         }
+    }
+
+    // Método para extraer el ID del lote desde la descripción del lote
+    private int obtenerIdLoteDesdeDescripcion(String loteDescripcion) {
+        String[] parts = loteDescripcion.split("-");
+        return Integer.parseInt(parts[0].trim());
     }
 
     private int obtenerIdArticuloDeLote(String loteSeleccionado) {
