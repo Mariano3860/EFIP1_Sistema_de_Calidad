@@ -291,7 +291,8 @@ public class CalificacionLoteController extends BaseController {
     public List<String> obtenerLotesDisponibles() {
         List<String> lotes = new ArrayList<>();
         String query = "SELECT CONCAT(i.idIngreso, '-', a.nombre) AS loteDescripcion " +
-                "FROM ingreso AS i JOIN articulo AS a ON i.idArticulo = a.idArticulo";
+                "FROM ingreso AS i JOIN articulo AS a ON i.idArticulo = a.idArticulo " +
+                "ORDER BY i.idIngreso DESC"; // Orden descendente por idIngreso
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);

@@ -104,6 +104,18 @@ public class CalificacionLotePanel extends JPanel {
         formularioPanel.add(new JLabel("Num Muestra:"));
         formularioPanel.add(numMuestraField);
 
+        // Listener para actualizar la lista de lotes al abrir el dropdown
+        loteDropdown.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {
+                actualizarListaLotes(); // Llamar a actualizarListaLotes() al abrir el dropdown
+            }
+            @Override
+            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {}
+            @Override
+            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
+        });
+
         loteDropdown.addActionListener(e -> cargarEspecificaciones());
 
         // Botón Crear Calificación
@@ -132,6 +144,14 @@ public class CalificacionLotePanel extends JPanel {
 
         // Cargar Resumen de Calificaciones
         cargarResumenCalificaciones();
+    }
+
+    // Método para actualizar la lista de lotes (si no se ha creado ya)
+    private void actualizarListaLotes() {
+        loteDropdown.removeAllItems();
+        for (String lote : obtenerLotesDisponibles()) {
+            loteDropdown.addItem(lote);
+        }
     }
 
     private void cargarResumenCalificaciones() {
