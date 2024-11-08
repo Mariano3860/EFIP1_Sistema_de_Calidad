@@ -19,10 +19,12 @@ public class MainFrame extends JFrame {
         // Creamos las instancias de los paneles que actuarán como las pestañas
         JPanel lotePanel = new IngresoPanel();  // Panel para el LotePanel
         JPanel especificacionPanel = new EspecificacionPanel();  // Panel para EspecificacionPanel
+        JPanel calificacionLotePanel = new CalificacionLotePanel();  // Panel para CalificacionLotePanel
 
         // Agregamos las pestañas al JTabbedPane
         tabbedPane.addTab("Lote", lotePanel);
         tabbedPane.addTab("Especificación", especificacionPanel);
+        tabbedPane.addTab("Calificación Lote", calificacionLotePanel);
 
         // Añadimos el JTabbedPane al marco principal
         add(tabbedPane);

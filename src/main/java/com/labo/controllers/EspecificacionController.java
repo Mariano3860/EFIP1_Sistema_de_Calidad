@@ -268,4 +268,29 @@ public class EspecificacionController extends BaseController{
         }
     }
 
+    /**
+     * Método para obtener el ID de una especificación dado su nombre.
+     *
+     * @param nombreEspecificacion Nombre de la especificación.
+     * @return ID de la especificación si existe, -1 si no se encuentra.
+     */
+    public int obtenerIdEspecificacionPorNombre(String nombreEspecificacion) {
+        String query = "SELECT idEspecificacion FROM Especificacion WHERE nombre = ?";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, nombreEspecificacion);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("idEspecificacion");
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error al obtener ID de la especificación por nombre", e);
+        }
+
+        return -1; // Retorno en caso de no encontrar la especificación
+    }
+
 }
